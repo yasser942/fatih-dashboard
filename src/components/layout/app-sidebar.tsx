@@ -1,4 +1,5 @@
 import { useLayout } from '@/context/layout-provider'
+import { useAuth } from '@/hooks/useAuth'
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +15,21 @@ import { TeamSwitcher } from './team-switcher'
 
 export function AppSidebar() {
   const { collapsible, variant } = useLayout()
+  const { user } = useAuth()
+
+  // Create user object for NavUser component
+  const userData = user
+    ? {
+        name: user.name,
+        email: user.email,
+        avatar: '/avatars/default.jpg', // You can add avatar to your User model later
+      }
+    : {
+        name: 'Guest',
+        email: 'guest@example.com',
+        avatar: '/avatars/default.jpg',
+      }
+
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
       <SidebarHeader>
@@ -29,7 +45,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={sidebarData.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

@@ -1,4 +1,4 @@
-import { useSearch } from '@tanstack/react-router'
+import { useSearch, Link } from '@tanstack/react-router'
 import {
   Card,
   CardContent,
@@ -15,34 +15,43 @@ export function SignIn() {
 
   return (
     <AuthLayout>
-      <Card className='gap-4'>
+      <Card className='gap-4' dir='rtl'>
         <CardHeader>
-          <CardTitle className='text-lg tracking-tight'>Sign in</CardTitle>
+          <CardTitle className='text-lg tracking-tight'>تسجيل الدخول</CardTitle>
           <CardDescription>
-            Enter your email and password below to <br />
-            log into your account
+            أدخل بريدك الإلكتروني وكلمة المرور أدناه <br />
+            لتسجيل الدخول إلى حسابك
           </CardDescription>
         </CardHeader>
         <CardContent>
           <UserAuthForm redirectTo={redirect} />
         </CardContent>
-        <CardFooter>
+        <CardFooter className='flex flex-col space-y-4'>
           <p className='text-muted-foreground px-8 text-center text-sm'>
-            By clicking sign in, you agree to our{' '}
+            بالنقر على تسجيل الدخول، فإنك توافق على{' '}
             <a
               href='/terms'
               className='hover:text-primary underline underline-offset-4'
             >
-              Terms of Service
+              شروط الخدمة
             </a>{' '}
-            and{' '}
+            و{' '}
             <a
               href='/privacy'
               className='hover:text-primary underline underline-offset-4'
             >
-              Privacy Policy
+              سياسة الخصوصية
             </a>
             .
+          </p>
+          <p className='text-muted-foreground text-center text-sm'>
+            ليس لديك حساب؟{' '}
+            <Link
+              to='/sign-up'
+              className='hover:text-primary font-medium underline underline-offset-4'
+            >
+              إنشاء حساب
+            </Link>
           </p>
         </CardFooter>
       </Card>

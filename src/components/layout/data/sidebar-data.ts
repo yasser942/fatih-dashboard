@@ -23,59 +23,55 @@ import {
   GalleryVerticalEnd,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
+import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
   user: {
-    name: 'satnaing',
-    email: 'satnaingdev@gmail.com',
+    name: 'مدير النظام',
+    email: 'admin@fatih-cargo.com',
     avatar: '/avatars/shadcn.jpg',
   },
   teams: [
     {
-      name: 'Shadcn Admin',
-      logo: Command,
-      plan: 'Vite + ShadcnUI',
+      name: 'الفاتح للشحن',
+      logo: FatihCargoLogo,
+      plan: 'نقل البضائع والأمانات',
     },
     {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
+      name: 'Fatih Cargo',
+      logo: FatihCargoLogo,
+      plan: 'Transport & Logistics',
     },
   ],
   navGroups: [
     {
-      title: 'General',
+      title: 'عام',
       items: [
         {
-          title: 'Dashboard',
+          title: 'لوحة التحكم',
           url: '/',
           icon: LayoutDashboard,
         },
         {
-          title: 'Tasks',
+          title: 'الشحنات',
+          url: '/shipments',
+          icon: Package,
+        },
+        {
+          title: 'المهام',
           url: '/tasks',
           icon: ListTodo,
         },
         {
-          title: 'Apps',
-          url: '/apps',
-          icon: Package,
-        },
-        {
-          title: 'Chats',
+          title: 'المراسلات',
           url: '/chats',
           badge: '3',
           icon: MessagesSquare,
         },
         {
-          title: 'Users',
-          url: '/users',
+          title: 'العملاء',
+          url: '/customers',
           icon: Users,
         },
         {
@@ -99,60 +95,60 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Pages',
+      title: 'الصفحات',
       items: [
         {
-          title: 'Auth',
+          title: 'المصادقة',
           icon: ShieldCheck,
           items: [
             {
-              title: 'Sign In',
+              title: 'تسجيل الدخول',
               url: '/sign-in',
             },
             {
-              title: 'Sign In (2 Col)',
+              title: 'تسجيل الدخول (عمودين)',
               url: '/sign-in-2',
             },
             {
-              title: 'Sign Up',
+              title: 'إنشاء حساب',
               url: '/sign-up',
             },
             {
-              title: 'Forgot Password',
+              title: 'نسيت كلمة المرور',
               url: '/forgot-password',
             },
             {
-              title: 'OTP',
+              title: 'رمز التحقق',
               url: '/otp',
             },
           ],
         },
         {
-          title: 'Errors',
+          title: 'الأخطاء',
           icon: Bug,
           items: [
             {
-              title: 'Unauthorized',
+              title: 'غير مخول',
               url: '/errors/unauthorized',
               icon: Lock,
             },
             {
-              title: 'Forbidden',
+              title: 'ممنوع',
               url: '/errors/forbidden',
               icon: UserX,
             },
             {
-              title: 'Not Found',
+              title: 'غير موجود',
               url: '/errors/not-found',
               icon: FileX,
             },
             {
-              title: 'Internal Server Error',
+              title: 'خطأ في الخادم',
               url: '/errors/internal-server-error',
               icon: ServerOff,
             },
             {
-              title: 'Maintenance Error',
+              title: 'خطأ في الصيانة',
               url: '/errors/maintenance-error',
               icon: Construction,
             },
@@ -161,41 +157,41 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Other',
+      title: 'أخرى',
       items: [
         {
-          title: 'Settings',
+          title: 'الإعدادات',
           icon: Settings,
           items: [
             {
-              title: 'Profile',
+              title: 'الملف الشخصي',
               url: '/settings',
               icon: UserCog,
             },
             {
-              title: 'Account',
+              title: 'الحساب',
               url: '/settings/account',
               icon: Wrench,
             },
             {
-              title: 'Appearance',
+              title: 'المظهر',
               url: '/settings/appearance',
               icon: Palette,
             },
             {
-              title: 'Notifications',
+              title: 'الإشعارات',
               url: '/settings/notifications',
               icon: Bell,
             },
             {
-              title: 'Display',
+              title: 'العرض',
               url: '/settings/display',
               icon: Monitor,
             },
           ],
         },
         {
-          title: 'Help Center',
+          title: 'مركز المساعدة',
           url: '/help-center',
           icon: HelpCircle,
         },
