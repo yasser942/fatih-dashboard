@@ -23,6 +23,7 @@ import {
   GalleryVerticalEnd,
   Coins,
   MapPin,
+  Store,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
@@ -80,6 +81,11 @@ export const sidebarData: SidebarData = {
           title: 'العملات',
           url: '/currencies',
           icon: Coins,
+        },
+        {
+          title: 'الفروع',
+          url: '/branches',
+          icon: Store,
         },
         {
           title: 'إدارة المواقع',

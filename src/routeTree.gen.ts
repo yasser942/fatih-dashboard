@@ -35,6 +35,7 @@ import { Route as AuthenticatedLocationMastersIndexRouteImport } from './routes/
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedCurrenciesIndexRouteImport } from './routes/_authenticated/currencies/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
+import { Route as AuthenticatedBranchesIndexRouteImport } from './routes/_authenticated/branches/index'
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
 import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
@@ -177,6 +178,12 @@ const AuthenticatedChatsIndexRoute = AuthenticatedChatsIndexRouteImport.update({
   path: '/chats/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBranchesIndexRoute =
+  AuthenticatedBranchesIndexRouteImport.update({
+    id: '/branches/',
+    path: '/branches/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAppsIndexRoute = AuthenticatedAppsIndexRouteImport.update({
   id: '/apps/',
   path: '/apps/',
@@ -253,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
+  '/branches': typeof AuthenticatedBranchesIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/currencies': typeof AuthenticatedCurrenciesIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
@@ -285,6 +293,7 @@ export interface FileRoutesByTo {
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
+  '/branches': typeof AuthenticatedBranchesIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/currencies': typeof AuthenticatedCurrenciesIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
@@ -323,6 +332,7 @@ export interface FileRoutesById {
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
+  '/_authenticated/branches/': typeof AuthenticatedBranchesIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
   '/_authenticated/currencies/': typeof AuthenticatedCurrenciesIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/clerk/sign-up'
     | '/clerk/user-management'
     | '/apps'
+    | '/branches'
     | '/chats'
     | '/currencies'
     | '/help-center'
@@ -391,6 +402,7 @@ export interface FileRouteTypes {
     | '/clerk/sign-up'
     | '/clerk/user-management'
     | '/apps'
+    | '/branches'
     | '/chats'
     | '/currencies'
     | '/help-center'
@@ -428,6 +440,7 @@ export interface FileRouteTypes {
     | '/clerk/(auth)/sign-up'
     | '/clerk/_authenticated/user-management'
     | '/_authenticated/apps/'
+    | '/_authenticated/branches/'
     | '/_authenticated/chats/'
     | '/_authenticated/currencies/'
     | '/_authenticated/help-center/'
@@ -634,6 +647,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/branches/': {
+      id: '/_authenticated/branches/'
+      path: '/branches'
+      fullPath: '/branches'
+      preLoaderRoute: typeof AuthenticatedBranchesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
       path: '/apps'
@@ -748,6 +768,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
+  AuthenticatedBranchesIndexRoute: typeof AuthenticatedBranchesIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedCurrenciesIndexRoute: typeof AuthenticatedCurrenciesIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
@@ -763,6 +784,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
+  AuthenticatedBranchesIndexRoute: AuthenticatedBranchesIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedCurrenciesIndexRoute: AuthenticatedCurrenciesIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
