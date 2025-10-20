@@ -21,14 +21,19 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
+                <Button
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <span className="sr-only">فتح القائمة</span>
                     <MoreHorizontal className="h-4 w-4" />
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
                 <DropdownMenuItem
-                    onClick={() => {
+                    onClick={(e) => {
+                        e.stopPropagation()
                         setCurrentRow(row.original)
                         setOpen('update')
                     }}
@@ -38,7 +43,8 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
-                    onClick={() => {
+                    onClick={(e) => {
+                        e.stopPropagation()
                         setCurrentRow(row.original)
                         setOpen('delete')
                     }}
