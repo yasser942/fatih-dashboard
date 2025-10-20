@@ -21,6 +21,8 @@ import {
   AudioWaveform,
   Command,
   GalleryVerticalEnd,
+  Coins,
+  MapPin,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
@@ -73,6 +75,32 @@ export const sidebarData: SidebarData = {
           title: 'العملاء',
           url: '/customers',
           icon: Users,
+        },
+        {
+          title: 'العملات',
+          url: '/currencies',
+          icon: Coins,
+        },
+        {
+          title: 'إدارة المواقع',
+          url: '/location-masters',
+          icon: MapPin,
+        },
+        {
+          title: 'إدارة الصلاحيات',
+          icon: ShieldCheck,
+          items: [
+            {
+              title: 'الأدوار',
+              url: '/roles',
+              icon: UserCog,
+            },
+            {
+              title: 'الصلاحيات',
+              url: '/permissions',
+              icon: Lock,
+            },
+          ],
         },
         {
           title: 'Secured by Clerk',

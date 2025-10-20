@@ -1,6 +1,7 @@
 import { UsersActionDialog } from './users-action-dialog'
 import { UsersDeleteDialog } from './users-delete-dialog'
 import { UsersInviteDialog } from './users-invite-dialog'
+import { UserRolesDialog } from './users-roles-dialog'
 import { useUsers } from './users-provider'
 
 export function UsersDialogs() {
@@ -43,6 +44,18 @@ export function UsersDialogs() {
               }, 500)
             }}
             currentRow={currentRow}
+          />
+
+          <UserRolesDialog
+            key={`user-roles-${currentRow.id}`}
+            open={open === 'roles'}
+            onOpenChange={() => {
+              setOpen('roles')
+              setTimeout(() => {
+                setCurrentRow(null)
+              }, 500)
+            }}
+            currentUser={currentRow}
           />
         </>
       )}

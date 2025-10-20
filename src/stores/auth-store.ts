@@ -19,8 +19,30 @@ interface AuthState {
 export const useAuthStore = create<AuthState>()((set) => {
   const tokenState = getItem(ACCESS_TOKEN)
   const userState = getItem(USER_DATA)
-  const initToken = tokenState ? JSON.parse(tokenState) : ''
-  const initUser = userState ? JSON.parse(userState) : null
+
+  // Handle token parsing safely
+  let initToken = ''
+  if (tokenState) {
+    try {
+      // Try to parse as JSON first (for objects)
+      const parsed = JSON.parse(tokenState)
+      initToken = typeof parsed === 'string' ? parsed : tokenState
+    } catch {
+      // If parsing fails, use the raw string (for plain string tokens)
+      initToken = tokenState
+    }
+  }
+
+  // Handle user parsing safely
+  let initUser = null
+  if (userState) {
+    try {
+      initUser = JSON.parse(userState)
+    } catch {
+      // If parsing fails, clear the corrupted data
+      removeItem(USER_DATA)
+    }
+  }
 
   return {
     auth: {
@@ -37,18 +59,37 @@ export const useAuthStore = create<AuthState>()((set) => {
       accessToken: initToken,
       setAccessToken: (accessToken) =>
         set((state) => {
-          setItem(ACCESS_TOKEN, accessToken)
+          // Store the token as a plain string, not JSON
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem(ACCESS_TOKEN, accessToken)
+            } catch (error) {
+              console.error('Error setting access token:', error)
+            }
+          }
           return { ...state, auth: { ...state.auth, accessToken } }
         }),
       resetAccessToken: () =>
         set((state) => {
-          removeItem(ACCESS_TOKEN)
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.removeItem(ACCESS_TOKEN)
+            } catch (error) {
+              console.error('Error removing access token:', error)
+            }
+          }
           return { ...state, auth: { ...state.auth, accessToken: '' } }
         }),
       reset: () =>
         set((state) => {
-          removeItem(ACCESS_TOKEN)
-          removeItem(USER_DATA)
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.removeItem(ACCESS_TOKEN)
+              localStorage.removeItem(USER_DATA)
+            } catch (error) {
+              console.error('Error clearing auth data:', error)
+            }
+          }
           return {
             ...state,
             auth: { ...state.auth, user: null, accessToken: '' },

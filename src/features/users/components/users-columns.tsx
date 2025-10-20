@@ -104,29 +104,38 @@ export const usersColumns: ColumnDef<User>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'role',
+    accessorKey: 'roles',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Role' />
+      <DataTableColumnHeader column={column} title='Roles' />
     ),
     cell: ({ row }) => {
-      const { role } = row.original
-      const userType = roles.find(({ value }) => value === role)
-
-      if (!userType) {
-        return null
-      }
+      const userRoles = row.original.roles || []
+      const roleCount = userRoles.length
 
       return (
-        <div className='flex items-center gap-x-2'>
-          {userType.icon && (
-            <userType.icon size={16} className='text-muted-foreground' />
+        <div className='flex flex-wrap gap-1'>
+          {roleCount > 0 ? (
+            <>
+              {userRoles.slice(0, 2).map((role) => (
+                <Badge key={role.id} variant='outline' className='text-xs'>
+                  {role.name}
+                </Badge>
+              ))}
+              {userRoles.length > 2 && (
+                <Badge variant='secondary' className='text-xs'>
+                  +{userRoles.length - 2} more
+                </Badge>
+              )}
+            </>
+          ) : (
+            <span className='text-muted-foreground text-sm'>No roles</span>
           )}
-          <span className='text-sm capitalize'>{row.getValue('role')}</span>
         </div>
       )
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      const userRoles = row.original.roles || []
+      return userRoles.some(role => value.includes(role.name))
     },
     enableSorting: false,
     enableHiding: false,

@@ -20,17 +20,20 @@ export function AuthGuard({
   useEffect(() => {
     if (requireAuth && !isAuthenticated) {
       // User needs to be authenticated but isn't
-      navigate({
-        to: '/sign-in',
-        search: { redirect: location.href },
-        replace: true,
-      })
+      // Only redirect if we're not already on the sign-in page
+      if (location.pathname !== '/sign-in') {
+        navigate({
+          to: '/sign-in',
+          search: { redirect: location.pathname },
+          replace: true,
+        })
+      }
     } else if (!requireAuth && isAuthenticated) {
       // User is authenticated but shouldn't be on auth pages
       const targetPath = redirectTo || '/'
       navigate({ to: targetPath, replace: true })
     }
-  }, [isAuthenticated, requireAuth, navigate, location.href, redirectTo])
+  }, [isAuthenticated, requireAuth, navigate, location.pathname, redirectTo])
 
   // Show loading or nothing while redirecting
   if (requireAuth && !isAuthenticated) {
