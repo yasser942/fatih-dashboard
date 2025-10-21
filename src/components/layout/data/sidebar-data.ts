@@ -24,6 +24,7 @@ import {
   Coins,
   MapPin,
   Store,
+  Truck,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
@@ -91,6 +92,11 @@ export const sidebarData: SidebarData = {
           title: 'إدارة المواقع',
           url: '/location-masters',
           icon: MapPin,
+        },
+        {
+          title: 'أنواع الأساطيل',
+          url: '/fleet-types',
+          icon: Truck,
         },
         {
           title: 'إدارة الصلاحيات',
