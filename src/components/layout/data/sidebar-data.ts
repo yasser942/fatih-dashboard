@@ -99,6 +99,11 @@ export const sidebarData: SidebarData = {
           icon: Truck,
         },
         {
+          title: 'المركبات',
+          url: '/fleets',
+          icon: Truck,
+        },
+        {
           title: 'إدارة الصلاحيات',
           icon: ShieldCheck,
           items: [
