@@ -25,6 +25,8 @@ import {
   MapPin,
   Store,
   Truck,
+  Car,
+  Settings2,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
@@ -94,14 +96,20 @@ export const sidebarData: SidebarData = {
           icon: MapPin,
         },
         {
-          title: 'أنواع الأساطيل',
-          url: '/fleet-types',
-          icon: Truck,
-        },
-        {
-          title: 'المركبات',
-          url: '/fleets',
-          icon: Truck,
+          title: 'إدارة الأسطول',
+          icon: Settings2,
+          items: [
+            {
+              title: 'أنواع الأساطيل',
+              url: '/fleet-types',
+              icon: Truck,
+            },
+            {
+              title: 'المركبات',
+              url: '/fleets',
+              icon: Car,
+            },
+          ],
         },
         {
           title: 'إدارة الصلاحيات',
