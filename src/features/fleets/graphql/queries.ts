@@ -1,27 +1,36 @@
 import { gql } from '@apollo/client/core'
 
 export const FLEETS_QUERY = gql`
-  query Fleets {
-    fleets {
-      id
-      fleet_type_id
-      fleetType {
+  query Fleets($first: Int, $page: Int) {
+    fleets(first: $first, page: $page) {
+      data {
         id
-        type_en
-        type_ar
-        capacity
+        fleet_type_id
+        fleetType {
+          id
+          type_en
+          type_ar
+          capacity
+          status
+        }
+        user_id
+        user {
+          id
+          name
+          email
+        }
+        plate_number
         status
+        created_at
+        updated_at
       }
-      user_id
-      user {
-        id
-        name
-        email
+      paginatorInfo {
+        count
+        currentPage
+        hasMorePages
+        perPage
+        total
       }
-      plate_number
-      status
-      created_at
-      updated_at
     }
   }
 `

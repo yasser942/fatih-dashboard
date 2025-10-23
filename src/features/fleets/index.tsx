@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client/react'
+import { getRouteApi } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -12,10 +13,30 @@ import { FleetsTable } from './components/fleets-table'
 import { FLEETS_QUERY } from './graphql/queries'
 import { type Fleet } from './data/schema'
 
-type FleetsQueryResponse = { fleets: Fleet[] }
+const route = getRouteApi('/_authenticated/fleets/')
+
+type FleetsQueryResponse = {
+    fleets: {
+        data: Fleet[]
+        paginatorInfo: {
+            count: number
+            currentPage: number
+            hasMorePages: boolean
+            perPage: number
+            total: number
+        }
+    }
+}
 
 export function Fleets() {
-    const { data, loading, error, refetch } = useQuery<FleetsQueryResponse>(FLEETS_QUERY, { errorPolicy: 'all' })
+    const search = route.useSearch()
+    const page = search.page ?? 1
+    const pageSize = search.pageSize ?? 15
+
+    const { data, loading, error, refetch } = useQuery<FleetsQueryResponse>(FLEETS_QUERY, {
+        errorPolicy: 'all',
+        variables: { first: pageSize, page: page }
+    })
 
     if (loading) {
         return (
@@ -57,10 +78,15 @@ export function Fleets() {
                     </div>
                     <FleetsPrimaryButtons />
                 </div>
-                <FleetsTable data={data?.fleets || []} />
+                <FleetsTable
+                    data={data?.fleets?.data || []}
+                    paginationInfo={data?.fleets?.paginatorInfo}
+                />
             </Main>
 
             <FleetsDialogs />
         </FleetsProvider>
     )
 }
+
+

@@ -22,9 +22,18 @@ import { useFleets } from './fleets-provider'
 
 const route = getRouteApi('/_authenticated/fleets/')
 
-type DataTableProps = { data: Fleet[] }
+type DataTableProps = {
+    data: Fleet[]
+    paginationInfo?: {
+        count: number
+        currentPage: number
+        hasMorePages: boolean
+        perPage: number
+        total: number
+    }
+}
 
-export function FleetsTable({ data }: DataTableProps) {
+export function FleetsTable({ data, paginationInfo }: DataTableProps) {
     const [rowSelection, setRowSelection] = useState({})
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -49,7 +58,9 @@ export function FleetsTable({ data }: DataTableProps) {
         onPaginationChange,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        // Disable client-side pagination since we're using server-side
+        manualPagination: true,
+        pageCount: paginationInfo ? Math.ceil(paginationInfo.total / paginationInfo.perPage) : -1,
         getSortedRowModel: getSortedRowModel(),
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -108,3 +119,5 @@ export function FleetsTable({ data }: DataTableProps) {
         </div>
     )
 }
+
+
