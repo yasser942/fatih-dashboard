@@ -1,5 +1,6 @@
 import { Cross2Icon } from '@radix-ui/react-icons'
 import { type Table } from '@tanstack/react-table'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DataTableFacetedFilter } from './faceted-filter'
@@ -9,6 +10,7 @@ type DataTableToolbarProps<TData> = {
   table: Table<TData>
   searchPlaceholder?: string
   searchKey?: string
+  onGlobalFilterChange?: (value: string) => void
   filters?: {
     columnId: string
     title: string
@@ -24,10 +26,50 @@ export function DataTableToolbar<TData>({
   table,
   searchPlaceholder = 'تصفية...',
   searchKey,
+  onGlobalFilterChange,
   filters = [],
 }: DataTableToolbarProps<TData>) {
+  const [searchValue, setSearchValue] = useState('')
+  const [isUserTyping, setIsUserTyping] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const debounceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const isFiltered =
     table.getState().columnFilters.length > 0 || table.getState().globalFilter
+
+  // Debounced function to update the global filter
+  const debouncedUpdateFilter = useCallback((value: string) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current)
+    }
+
+    debounceTimeoutRef.current = setTimeout(() => {
+      if (onGlobalFilterChange) {
+        onGlobalFilterChange(value)
+      } else {
+        table.setGlobalFilter(value)
+      }
+      setIsUserTyping(false)
+    }, 300) // 300ms delay
+  }, [onGlobalFilterChange, table])
+
+  // Sync local state with table state when it changes externally, but only if user is not typing
+  useEffect(() => {
+    if (!searchKey && !isUserTyping) {
+      const currentGlobalFilter = table.getState().globalFilter ?? ''
+      if (currentGlobalFilter !== searchValue) {
+        setSearchValue(currentGlobalFilter)
+      }
+    }
+  }, [table.getState().globalFilter, searchKey, isUserTyping, searchValue])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current)
+      }
+    }
+  }, [])
 
   return (
     <div className='flex items-center justify-between'>
@@ -45,9 +87,21 @@ export function DataTableToolbar<TData>({
           />
         ) : (
           <Input
+            ref={inputRef}
             placeholder={searchPlaceholder}
-            value={table.getState().globalFilter ?? ''}
-            onChange={(event) => table.setGlobalFilter(event.target.value)}
+            value={searchValue}
+            onChange={(event) => {
+              const value = event.target.value
+              setSearchValue(value)
+              setIsUserTyping(true)
+              debouncedUpdateFilter(value)
+            }}
+            onBlur={() => {
+              setIsUserTyping(false)
+            }}
+            onFocus={() => {
+              setIsUserTyping(true)
+            }}
             className='h-8 w-[150px] lg:w-[250px]'
           />
         )}

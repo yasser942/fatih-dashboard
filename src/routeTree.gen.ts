@@ -35,6 +35,7 @@ import { Route as AuthenticatedLocationMastersIndexRouteImport } from './routes/
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedFleetsIndexRouteImport } from './routes/_authenticated/fleets/index'
 import { Route as AuthenticatedFleetTypesIndexRouteImport } from './routes/_authenticated/fleet-types/index'
+import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers/index'
 import { Route as AuthenticatedCurrenciesIndexRouteImport } from './routes/_authenticated/currencies/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedBranchesIndexRouteImport } from './routes/_authenticated/branches/index'
@@ -181,6 +182,12 @@ const AuthenticatedFleetTypesIndexRoute =
     path: '/fleet-types/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedCustomersIndexRoute =
+  AuthenticatedCustomersIndexRouteImport.update({
+    id: '/customers/',
+    path: '/customers/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCurrenciesIndexRoute =
   AuthenticatedCurrenciesIndexRouteImport.update({
     id: '/currencies/',
@@ -277,6 +284,7 @@ export interface FileRoutesByFullPath {
   '/branches': typeof AuthenticatedBranchesIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/currencies': typeof AuthenticatedCurrenciesIndexRoute
+  '/customers': typeof AuthenticatedCustomersIndexRoute
   '/fleet-types': typeof AuthenticatedFleetTypesIndexRoute
   '/fleets': typeof AuthenticatedFleetsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
@@ -312,6 +320,7 @@ export interface FileRoutesByTo {
   '/branches': typeof AuthenticatedBranchesIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/currencies': typeof AuthenticatedCurrenciesIndexRoute
+  '/customers': typeof AuthenticatedCustomersIndexRoute
   '/fleet-types': typeof AuthenticatedFleetTypesIndexRoute
   '/fleets': typeof AuthenticatedFleetsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
@@ -353,6 +362,7 @@ export interface FileRoutesById {
   '/_authenticated/branches/': typeof AuthenticatedBranchesIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
   '/_authenticated/currencies/': typeof AuthenticatedCurrenciesIndexRoute
+  '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
   '/_authenticated/fleet-types/': typeof AuthenticatedFleetTypesIndexRoute
   '/_authenticated/fleets/': typeof AuthenticatedFleetsIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/branches'
     | '/chats'
     | '/currencies'
+    | '/customers'
     | '/fleet-types'
     | '/fleets'
     | '/help-center'
@@ -427,6 +438,7 @@ export interface FileRouteTypes {
     | '/branches'
     | '/chats'
     | '/currencies'
+    | '/customers'
     | '/fleet-types'
     | '/fleets'
     | '/help-center'
@@ -467,6 +479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/branches/'
     | '/_authenticated/chats/'
     | '/_authenticated/currencies/'
+    | '/_authenticated/customers/'
     | '/_authenticated/fleet-types/'
     | '/_authenticated/fleets/'
     | '/_authenticated/help-center/'
@@ -673,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFleetTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/customers/': {
+      id: '/_authenticated/customers/'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AuthenticatedCustomersIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/currencies/': {
       id: '/_authenticated/currencies/'
       path: '/currencies'
@@ -811,6 +831,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedBranchesIndexRoute: typeof AuthenticatedBranchesIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedCurrenciesIndexRoute: typeof AuthenticatedCurrenciesIndexRoute
+  AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
   AuthenticatedFleetTypesIndexRoute: typeof AuthenticatedFleetTypesIndexRoute
   AuthenticatedFleetsIndexRoute: typeof AuthenticatedFleetsIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
@@ -829,6 +850,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedBranchesIndexRoute: AuthenticatedBranchesIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedCurrenciesIndexRoute: AuthenticatedCurrenciesIndexRoute,
+  AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,
   AuthenticatedFleetTypesIndexRoute: AuthenticatedFleetTypesIndexRoute,
   AuthenticatedFleetsIndexRoute: AuthenticatedFleetsIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
