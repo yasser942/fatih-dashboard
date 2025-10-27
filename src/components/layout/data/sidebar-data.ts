@@ -27,6 +27,7 @@ import {
   Truck,
   Car,
   Settings2,
+  ClipboardList,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
@@ -61,8 +62,8 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'الشحنات',
-          url: '/shipments',
-          icon: Package,
+          url: '/orders',
+          icon: ClipboardList,
         },
         {
           title: 'المهام',

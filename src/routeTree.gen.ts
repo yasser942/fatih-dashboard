@@ -31,6 +31,7 @@ import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedRolesIndexRouteImport } from './routes/_authenticated/roles/index'
 import { Route as AuthenticatedPermissionsIndexRouteImport } from './routes/_authenticated/permissions/index'
+import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedLocationMastersIndexRouteImport } from './routes/_authenticated/location-masters/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedFleetsIndexRouteImport } from './routes/_authenticated/fleets/index'
@@ -156,6 +157,12 @@ const AuthenticatedPermissionsIndexRoute =
   AuthenticatedPermissionsIndexRouteImport.update({
     id: '/permissions/',
     path: '/permissions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOrdersIndexRoute =
+  AuthenticatedOrdersIndexRouteImport.update({
+    id: '/orders/',
+    path: '/orders/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedLocationMastersIndexRoute =
@@ -289,6 +296,7 @@ export interface FileRoutesByFullPath {
   '/fleets': typeof AuthenticatedFleetsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/location-masters': typeof AuthenticatedLocationMastersIndexRoute
+  '/orders': typeof AuthenticatedOrdersIndexRoute
   '/permissions': typeof AuthenticatedPermissionsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -325,6 +333,7 @@ export interface FileRoutesByTo {
   '/fleets': typeof AuthenticatedFleetsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/location-masters': typeof AuthenticatedLocationMastersIndexRoute
+  '/orders': typeof AuthenticatedOrdersIndexRoute
   '/permissions': typeof AuthenticatedPermissionsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -367,6 +376,7 @@ export interface FileRoutesById {
   '/_authenticated/fleets/': typeof AuthenticatedFleetsIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/location-masters/': typeof AuthenticatedLocationMastersIndexRoute
+  '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/permissions/': typeof AuthenticatedPermissionsIndexRoute
   '/_authenticated/roles/': typeof AuthenticatedRolesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -407,6 +417,7 @@ export interface FileRouteTypes {
     | '/fleets'
     | '/help-center'
     | '/location-masters'
+    | '/orders'
     | '/permissions'
     | '/roles'
     | '/settings/'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/fleets'
     | '/help-center'
     | '/location-masters'
+    | '/orders'
     | '/permissions'
     | '/roles'
     | '/settings'
@@ -484,6 +496,7 @@ export interface FileRouteTypes {
     | '/_authenticated/fleets/'
     | '/_authenticated/help-center/'
     | '/_authenticated/location-masters/'
+    | '/_authenticated/orders/'
     | '/_authenticated/permissions/'
     | '/_authenticated/roles/'
     | '/_authenticated/settings/'
@@ -656,6 +669,13 @@ declare module '@tanstack/react-router' {
       path: '/permissions'
       fullPath: '/permissions'
       preLoaderRoute: typeof AuthenticatedPermissionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/orders/': {
+      id: '/_authenticated/orders/'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthenticatedOrdersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/location-masters/': {
@@ -836,6 +856,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFleetsIndexRoute: typeof AuthenticatedFleetsIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedLocationMastersIndexRoute: typeof AuthenticatedLocationMastersIndexRoute
+  AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
   AuthenticatedPermissionsIndexRoute: typeof AuthenticatedPermissionsIndexRoute
   AuthenticatedRolesIndexRoute: typeof AuthenticatedRolesIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
@@ -856,6 +877,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
   AuthenticatedLocationMastersIndexRoute:
     AuthenticatedLocationMastersIndexRoute,
+  AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
   AuthenticatedPermissionsIndexRoute: AuthenticatedPermissionsIndexRoute,
   AuthenticatedRolesIndexRoute: AuthenticatedRolesIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
