@@ -54,8 +54,6 @@ export const updateLocationMasterSchema = z.object({
 
 export type LocationMaster = z.infer<typeof createLocationMasterSchema> & {
     id: number
-    created_at: string
-    updated_at: string
 }
 
 export type CreateLocationMaster = z.infer<typeof createLocationMasterSchema>

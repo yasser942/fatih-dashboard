@@ -8,8 +8,6 @@ export const CURRENCIES_QUERY = gql`
       symbol
       code
       is_active
-      created_at
-      updated_at
     }
   }
 `
@@ -22,8 +20,6 @@ export const CURRENCY_QUERY = gql`
       symbol
       code
       is_active
-      created_at
-      updated_at
     }
   }
 `

@@ -26,8 +26,6 @@ export const LOCATION_MASTERS_QUERY = gql`
       Latitude_y
       Longitude_x
       is_active
-      created_at
-      updated_at
     }
   }
 `
@@ -58,8 +56,6 @@ export const LOCATION_MASTER_QUERY = gql`
       Latitude_y
       Longitude_x
       is_active
-      created_at
-      updated_at
     }
   }
 `

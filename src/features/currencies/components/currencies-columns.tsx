@@ -52,14 +52,6 @@ export const currenciesColumns: ColumnDef<Currency>[] = [
         },
     },
     {
-        accessorKey: 'created_at',
-        header: 'تاريخ الإنشاء',
-        cell: ({ row }) => {
-            const date = new Date(row.getValue('created_at'))
-            return <div className="text-sm text-muted-foreground">{date.toLocaleDateString('en-US')}</div>
-        },
-    },
-    {
         id: 'actions',
         cell: ({ row }) => <DataTableRowActions row={row} />,
     },

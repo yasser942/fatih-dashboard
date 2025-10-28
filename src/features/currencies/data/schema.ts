@@ -6,8 +6,6 @@ export const currencySchema = z.object({
     symbol: z.string().min(1, 'رمز العملة مطلوب'),
     code: z.string().length(3, 'رمز العملة يجب أن يكون 3 أحرف'),
     is_active: z.boolean(),
-    created_at: z.string(),
-    updated_at: z.string(),
 })
 
 export const createCurrencySchema = z.object({

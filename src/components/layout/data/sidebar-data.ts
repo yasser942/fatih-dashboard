@@ -28,6 +28,9 @@ import {
   Car,
   Settings2,
   ClipboardList,
+  Building2,
+  Briefcase,
+  UserCheck,
 } from 'lucide-react'
 import { ClerkLogo } from '@/assets/clerk-logo'
 import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
@@ -109,6 +112,27 @@ export const sidebarData: SidebarData = {
               title: 'المركبات',
               url: '/fleets',
               icon: Car,
+            },
+          ],
+        },
+        {
+          title: 'إدارة الموظفين',
+          icon: Users,
+          items: [
+            {
+              title: 'الأقسام',
+              url: '/departments',
+              icon: Building2,
+            },
+            {
+              title: 'الوظائف',
+              url: '/positions',
+              icon: Briefcase,
+            },
+            {
+              title: 'الموظفون',
+              url: '/employees',
+              icon: UserCheck,
             },
           ],
         },

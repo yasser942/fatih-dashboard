@@ -30,12 +30,15 @@ import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedRolesIndexRouteImport } from './routes/_authenticated/roles/index'
+import { Route as AuthenticatedPositionsIndexRouteImport } from './routes/_authenticated/positions/index'
 import { Route as AuthenticatedPermissionsIndexRouteImport } from './routes/_authenticated/permissions/index'
 import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedLocationMastersIndexRouteImport } from './routes/_authenticated/location-masters/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedFleetsIndexRouteImport } from './routes/_authenticated/fleets/index'
 import { Route as AuthenticatedFleetTypesIndexRouteImport } from './routes/_authenticated/fleet-types/index'
+import { Route as AuthenticatedEmployeesIndexRouteImport } from './routes/_authenticated/employees/index'
+import { Route as AuthenticatedDepartmentsIndexRouteImport } from './routes/_authenticated/departments/index'
 import { Route as AuthenticatedCustomersIndexRouteImport } from './routes/_authenticated/customers/index'
 import { Route as AuthenticatedCurrenciesIndexRouteImport } from './routes/_authenticated/currencies/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
@@ -153,6 +156,12 @@ const AuthenticatedRolesIndexRoute = AuthenticatedRolesIndexRouteImport.update({
   path: '/roles/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPositionsIndexRoute =
+  AuthenticatedPositionsIndexRouteImport.update({
+    id: '/positions/',
+    path: '/positions/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPermissionsIndexRoute =
   AuthenticatedPermissionsIndexRouteImport.update({
     id: '/permissions/',
@@ -187,6 +196,18 @@ const AuthenticatedFleetTypesIndexRoute =
   AuthenticatedFleetTypesIndexRouteImport.update({
     id: '/fleet-types/',
     path: '/fleet-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedEmployeesIndexRoute =
+  AuthenticatedEmployeesIndexRouteImport.update({
+    id: '/employees/',
+    path: '/employees/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedDepartmentsIndexRoute =
+  AuthenticatedDepartmentsIndexRouteImport.update({
+    id: '/departments/',
+    path: '/departments/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedCustomersIndexRoute =
@@ -292,12 +313,15 @@ export interface FileRoutesByFullPath {
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/currencies': typeof AuthenticatedCurrenciesIndexRoute
   '/customers': typeof AuthenticatedCustomersIndexRoute
+  '/departments': typeof AuthenticatedDepartmentsIndexRoute
+  '/employees': typeof AuthenticatedEmployeesIndexRoute
   '/fleet-types': typeof AuthenticatedFleetTypesIndexRoute
   '/fleets': typeof AuthenticatedFleetsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/location-masters': typeof AuthenticatedLocationMastersIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/permissions': typeof AuthenticatedPermissionsIndexRoute
+  '/positions': typeof AuthenticatedPositionsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
@@ -329,12 +353,15 @@ export interface FileRoutesByTo {
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/currencies': typeof AuthenticatedCurrenciesIndexRoute
   '/customers': typeof AuthenticatedCustomersIndexRoute
+  '/departments': typeof AuthenticatedDepartmentsIndexRoute
+  '/employees': typeof AuthenticatedEmployeesIndexRoute
   '/fleet-types': typeof AuthenticatedFleetTypesIndexRoute
   '/fleets': typeof AuthenticatedFleetsIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/location-masters': typeof AuthenticatedLocationMastersIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/permissions': typeof AuthenticatedPermissionsIndexRoute
+  '/positions': typeof AuthenticatedPositionsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
@@ -372,12 +399,15 @@ export interface FileRoutesById {
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
   '/_authenticated/currencies/': typeof AuthenticatedCurrenciesIndexRoute
   '/_authenticated/customers/': typeof AuthenticatedCustomersIndexRoute
+  '/_authenticated/departments/': typeof AuthenticatedDepartmentsIndexRoute
+  '/_authenticated/employees/': typeof AuthenticatedEmployeesIndexRoute
   '/_authenticated/fleet-types/': typeof AuthenticatedFleetTypesIndexRoute
   '/_authenticated/fleets/': typeof AuthenticatedFleetsIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/_authenticated/location-masters/': typeof AuthenticatedLocationMastersIndexRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/permissions/': typeof AuthenticatedPermissionsIndexRoute
+  '/_authenticated/positions/': typeof AuthenticatedPositionsIndexRoute
   '/_authenticated/roles/': typeof AuthenticatedRolesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
@@ -413,12 +443,15 @@ export interface FileRouteTypes {
     | '/chats'
     | '/currencies'
     | '/customers'
+    | '/departments'
+    | '/employees'
     | '/fleet-types'
     | '/fleets'
     | '/help-center'
     | '/location-masters'
     | '/orders'
     | '/permissions'
+    | '/positions'
     | '/roles'
     | '/settings/'
     | '/tasks'
@@ -450,12 +483,15 @@ export interface FileRouteTypes {
     | '/chats'
     | '/currencies'
     | '/customers'
+    | '/departments'
+    | '/employees'
     | '/fleet-types'
     | '/fleets'
     | '/help-center'
     | '/location-masters'
     | '/orders'
     | '/permissions'
+    | '/positions'
     | '/roles'
     | '/settings'
     | '/tasks'
@@ -492,12 +528,15 @@ export interface FileRouteTypes {
     | '/_authenticated/chats/'
     | '/_authenticated/currencies/'
     | '/_authenticated/customers/'
+    | '/_authenticated/departments/'
+    | '/_authenticated/employees/'
     | '/_authenticated/fleet-types/'
     | '/_authenticated/fleets/'
     | '/_authenticated/help-center/'
     | '/_authenticated/location-masters/'
     | '/_authenticated/orders/'
     | '/_authenticated/permissions/'
+    | '/_authenticated/positions/'
     | '/_authenticated/roles/'
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
@@ -664,6 +703,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRolesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/positions/': {
+      id: '/_authenticated/positions/'
+      path: '/positions'
+      fullPath: '/positions'
+      preLoaderRoute: typeof AuthenticatedPositionsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/permissions/': {
       id: '/_authenticated/permissions/'
       path: '/permissions'
@@ -704,6 +750,20 @@ declare module '@tanstack/react-router' {
       path: '/fleet-types'
       fullPath: '/fleet-types'
       preLoaderRoute: typeof AuthenticatedFleetTypesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/employees/': {
+      id: '/_authenticated/employees/'
+      path: '/employees'
+      fullPath: '/employees'
+      preLoaderRoute: typeof AuthenticatedEmployeesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/departments/': {
+      id: '/_authenticated/departments/'
+      path: '/departments'
+      fullPath: '/departments'
+      preLoaderRoute: typeof AuthenticatedDepartmentsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/customers/': {
@@ -852,12 +912,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedCurrenciesIndexRoute: typeof AuthenticatedCurrenciesIndexRoute
   AuthenticatedCustomersIndexRoute: typeof AuthenticatedCustomersIndexRoute
+  AuthenticatedDepartmentsIndexRoute: typeof AuthenticatedDepartmentsIndexRoute
+  AuthenticatedEmployeesIndexRoute: typeof AuthenticatedEmployeesIndexRoute
   AuthenticatedFleetTypesIndexRoute: typeof AuthenticatedFleetTypesIndexRoute
   AuthenticatedFleetsIndexRoute: typeof AuthenticatedFleetsIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedLocationMastersIndexRoute: typeof AuthenticatedLocationMastersIndexRoute
   AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
   AuthenticatedPermissionsIndexRoute: typeof AuthenticatedPermissionsIndexRoute
+  AuthenticatedPositionsIndexRoute: typeof AuthenticatedPositionsIndexRoute
   AuthenticatedRolesIndexRoute: typeof AuthenticatedRolesIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
@@ -872,6 +935,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedCurrenciesIndexRoute: AuthenticatedCurrenciesIndexRoute,
   AuthenticatedCustomersIndexRoute: AuthenticatedCustomersIndexRoute,
+  AuthenticatedDepartmentsIndexRoute: AuthenticatedDepartmentsIndexRoute,
+  AuthenticatedEmployeesIndexRoute: AuthenticatedEmployeesIndexRoute,
   AuthenticatedFleetTypesIndexRoute: AuthenticatedFleetTypesIndexRoute,
   AuthenticatedFleetsIndexRoute: AuthenticatedFleetsIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
@@ -879,6 +944,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedLocationMastersIndexRoute,
   AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
   AuthenticatedPermissionsIndexRoute: AuthenticatedPermissionsIndexRoute,
+  AuthenticatedPositionsIndexRoute: AuthenticatedPositionsIndexRoute,
   AuthenticatedRolesIndexRoute: AuthenticatedRolesIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,

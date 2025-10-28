@@ -72,14 +72,6 @@ export const columns: ColumnDef<LocationMaster>[] = [
         },
     },
     {
-        accessorKey: 'created_at',
-        header: 'تاريخ الإنشاء',
-        cell: ({ row }) => {
-            const date = new Date(row.getValue('created_at'))
-            return date.toLocaleDateString('en-US')
-        },
-    },
-    {
         id: 'actions',
         cell: ({ row }) => <DataTableRowActions row={row} />,
     },
