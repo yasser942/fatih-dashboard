@@ -19,15 +19,22 @@ type DataTableColumnHeaderProps<TData, TValue> =
   React.HTMLAttributes<HTMLDivElement> & {
     column: Column<TData, TValue>
     title: string
+    icon?: React.ReactNode
   }
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
   title,
   className,
+  icon,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
-    return <div className={cn(className)}>{title}</div>
+    return (
+      <div className={cn('flex items-center gap-2', className)}>
+        {icon}
+        <span>{title}</span>
+      </div>
+    )
   }
 
   return (
@@ -39,6 +46,7 @@ export function DataTableColumnHeader<TData, TValue>({
             size='sm'
             className='data-[state=open]:bg-accent h-8'
           >
+            {icon && <span className='me-1.5'>{icon}</span>}
             <span>{title}</span>
             {column.getIsSorted() === 'desc' ? (
               <ArrowDownIcon className='ms-2 h-4 w-4' />

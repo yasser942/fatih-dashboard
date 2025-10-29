@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@apollo/client/react'
 import { toast } from 'sonner'
+import { Lock, Shield, ShieldCheck, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     Form,
@@ -11,6 +12,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
+    FormDescription,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
@@ -22,6 +24,12 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { type Permission } from '../data/schema'
 import { CREATE_PERMISSION_MUTATION, UPDATE_PERMISSION_MUTATION } from '../graphql/mutations'
 import { usePermissions } from './permissions-provider'
@@ -169,10 +177,16 @@ export function PermissionsMutateDrawer({
                                 name='name'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>الاسم</FormLabel>
+                                        <FormLabel className='flex items-center gap-2'>
+                                            <Lock className='h-4 w-4' />
+                                            الاسم
+                                        </FormLabel>
                                         <FormControl>
-                                            <Input placeholder='أدخل اسم الصلاحية' {...field} />
+                                            <Input placeholder='مثال: create-users، edit-posts، delete-orders' {...field} />
                                         </FormControl>
+                                        <FormDescription>
+                                            اسم فريد للصلاحية يصف الإجراء المسموح به
+                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -183,10 +197,28 @@ export function PermissionsMutateDrawer({
                                 name='guard_name'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>اسم الحارس</FormLabel>
+                                        <TooltipProvider>
+                                            <FormLabel className='flex items-center gap-2'>
+                                                <Shield className='h-4 w-4' />
+                                                اسم الحارس
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button type='button' className='text-muted-foreground hover:text-foreground'>
+                                                            <ShieldCheck className='h-4 w-4' />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className='max-w-xs'>
+                                                        <p>الحارس يحدد نطاق الحماية (مثل: web للويب، api لواجهة برمجة التطبيقات)</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </FormLabel>
+                                        </TooltipProvider>
                                         <FormControl>
-                                            <Input placeholder='أدخل اسم الحارس' {...field} />
+                                            <Input placeholder='web' {...field} />
                                         </FormControl>
+                                        <FormDescription>
+                                            القيمة الافتراضية: web
+                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}

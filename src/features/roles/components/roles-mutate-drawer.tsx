@@ -3,6 +3,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { toast } from 'sonner'
+import { Search, Shield, ShieldCheck, Lock, Tag, CheckSquare, XSquare } from 'lucide-react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -12,6 +14,7 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
+    FormDescription,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import {
@@ -26,6 +29,13 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { type Role } from '../data/schema'
 import { CREATE_ROLE_MUTATION, UPDATE_ROLE_MUTATION, GIVE_ROLE_PERMISSION_MUTATION, REVOKE_ROLE_PERMISSION_MUTATION } from '../graphql/mutations'
 import { PERMISSIONS_QUERY } from '../graphql/queries'
@@ -52,6 +62,8 @@ export function RolesMutateDrawer({
 }: RoleMutateDrawerProps) {
     const isUpdate = !!currentRow
     const { refetch } = useRoles()
+    const [permissionSearch, setPermissionSearch] = useState('')
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({})
 
     const form = useForm<RoleForm>({
         resolver: zodResolver(formSchema),
@@ -216,6 +228,41 @@ export function RolesMutateDrawer({
         return acc
     }, {})
 
+    // Filter permissions based on search
+    const filteredGroupedPermissions = Object.entries(groupedPermissions).reduce((acc: Record<string, any[]>, [guardName, guardPermissions]) => {
+        const filtered = guardPermissions.filter((p: any) =>
+            p.name.toLowerCase().includes(permissionSearch.toLowerCase())
+        )
+        if (filtered.length > 0) {
+            acc[guardName] = filtered
+        }
+        return acc
+    }, {})
+
+    // Helper functions for select all/deselect all
+    const handleSelectAllPermissions = () => {
+        const allPermissionNames = permissions.map((p: any) => p.name)
+        form.setValue('permissions', allPermissionNames)
+    }
+
+    const handleDeselectAllPermissions = () => {
+        form.setValue('permissions', [])
+    }
+
+    const handleSelectGuardPermissions = (guardName: string) => {
+        const currentPermissions = form.getValues('permissions') || []
+        const guardPermissionNames = groupedPermissions[guardName].map((p: any) => p.name)
+        const newPermissions = Array.from(new Set([...currentPermissions, ...guardPermissionNames]))
+        form.setValue('permissions', newPermissions)
+    }
+
+    const handleDeselectGuardPermissions = (guardName: string) => {
+        const currentPermissions = form.getValues('permissions') || []
+        const guardPermissionNames = groupedPermissions[guardName].map((p: any) => p.name)
+        const newPermissions = currentPermissions.filter((p: string) => !guardPermissionNames.includes(p))
+        form.setValue('permissions', newPermissions)
+    }
+
     return (
         <Sheet
             open={open}
@@ -244,10 +291,16 @@ export function RolesMutateDrawer({
                                 name='name'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>الاسم</FormLabel>
+                                        <FormLabel className='flex items-center gap-2'>
+                                            <Tag className='h-4 w-4' />
+                                            الاسم
+                                        </FormLabel>
                                         <FormControl>
-                                            <Input placeholder='أدخل اسم الدور' {...field} />
+                                            <Input placeholder='مثال: مدير، محرر، مستخدم' {...field} />
                                         </FormControl>
+                                        <FormDescription>
+                                            اسم فريد للدور يسهل التعرف عليه
+                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -258,10 +311,28 @@ export function RolesMutateDrawer({
                                 name='guard_name'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>اسم الحارس</FormLabel>
+                                        <TooltipProvider>
+                                            <FormLabel className='flex items-center gap-2'>
+                                                <Shield className='h-4 w-4' />
+                                                اسم الحارس
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button type='button' className='text-muted-foreground hover:text-foreground'>
+                                                            <ShieldCheck className='h-4 w-4' />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent className='max-w-xs'>
+                                                        <p>الحارس يحدد نطاق الحماية (مثل: web للويب، api لواجهة برمجة التطبيقات)</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </FormLabel>
+                                        </TooltipProvider>
                                         <FormControl>
-                                            <Input placeholder='أدخل اسم الحارس' {...field} />
+                                            <Input placeholder='web' {...field} />
                                         </FormControl>
+                                        <FormDescription>
+                                            القيمة الافتراضية: web
+                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -272,59 +343,180 @@ export function RolesMutateDrawer({
                                 name='permissions'
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>
-                                            الصلاحيات
-                                            {selectedPermissions.length > 0 && (
-                                                <Badge variant='secondary' className='ml-2'>
-                                                    {selectedPermissions.length} محدد
-                                                </Badge>
-                                            )}
-                                        </FormLabel>
-                                        <FormControl>
-                                            <ScrollArea className='h-64 w-full rounded-md border p-4'>
-                                                {permissionsLoading ? (
-                                                    <div className='text-center text-sm text-muted-foreground'>
-                                                        جاري تحميل الصلاحيات...
-                                                    </div>
-                                                ) : Object.keys(groupedPermissions).length === 0 ? (
-                                                    <div className='text-center text-sm text-muted-foreground'>
-                                                        لا توجد صلاحيات متاحة
-                                                    </div>
-                                                ) : (
-                                                    <div className='space-y-4'>
-                                                        {Object.entries(groupedPermissions).map(([guardName, guardPermissions]) => (
-                                                            <div key={guardName}>
-                                                                <h4 className='text-sm font-medium capitalize'>{guardName} حارس</h4>
-                                                                <div className='mt-2 space-y-2'>
-                                                                    {guardPermissions.map((permission) => (
-                                                                        <div key={permission.id} className='flex items-center space-x-2'>
-                                                                            <Checkbox
-                                                                                id={`permission-${permission.id}`}
-                                                                                checked={field.value?.includes(permission.name) || false}
-                                                                                onCheckedChange={(checked) => {
-                                                                                    const currentPermissions = field.value || []
-                                                                                    if (checked) {
-                                                                                        field.onChange([...currentPermissions, permission.name])
-                                                                                    } else {
-                                                                                        field.onChange(currentPermissions.filter((p: string) => p !== permission.name))
-                                                                                    }
-                                                                                }}
-                                                                            />
-                                                                            <label
-                                                                                htmlFor={`permission-${permission.id}`}
-                                                                                className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                                                                            >
-                                                                                {permission.name}
-                                                                            </label>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                                <Separator className='mt-4' />
-                                                            </div>
-                                                        ))}
-                                                    </div>
+                                        <div className='flex items-center justify-between'>
+                                            <FormLabel className='flex items-center gap-2'>
+                                                <Lock className='h-4 w-4' />
+                                                الصلاحيات
+                                                {selectedPermissions.length > 0 && (
+                                                    <Badge variant='secondary' className='ml-2'>
+                                                        {selectedPermissions.length} محدد
+                                                    </Badge>
                                                 )}
-                                            </ScrollArea>
+                                            </FormLabel>
+                                            <div className='flex gap-1'>
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                type='button'
+                                                                variant='ghost'
+                                                                size='sm'
+                                                                className='h-7 px-2'
+                                                                onClick={handleSelectAllPermissions}
+                                                            >
+                                                                <CheckSquare className='h-3.5 w-3.5' />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>تحديد الكل</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                                <TooltipProvider>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                type='button'
+                                                                variant='ghost'
+                                                                size='sm'
+                                                                className='h-7 px-2'
+                                                                onClick={handleDeselectAllPermissions}
+                                                            >
+                                                                <XSquare className='h-3.5 w-3.5' />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>إلغاء تحديد الكل</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </TooltipProvider>
+                                            </div>
+                                        </div>
+                                        <FormDescription>
+                                            اختر الصلاحيات التي يمتلكها هذا الدور
+                                        </FormDescription>
+                                        <FormControl>
+                                            <div className='space-y-3'>
+                                                {/* Search Input */}
+                                                <div className='relative'>
+                                                    <Search className='absolute left-2 top-2.5 h-4 w-4 text-muted-foreground' />
+                                                    <Input
+                                                        type='text'
+                                                        placeholder='ابحث عن صلاحية...'
+                                                        value={permissionSearch}
+                                                        onChange={(e) => setPermissionSearch(e.target.value)}
+                                                        className='pl-8'
+                                                    />
+                                                </div>
+
+                                                {/* Permissions List */}
+                                                <ScrollArea className='h-80 w-full rounded-md border'>
+                                                    {permissionsLoading ? (
+                                                        <div className='flex h-40 items-center justify-center text-sm text-muted-foreground'>
+                                                            <div className='flex flex-col items-center gap-2'>
+                                                                <div className='h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent' />
+                                                                <p>جاري تحميل الصلاحيات...</p>
+                                                            </div>
+                                                        </div>
+                                                    ) : Object.keys(filteredGroupedPermissions).length === 0 ? (
+                                                        <div className='flex h-40 items-center justify-center text-sm text-muted-foreground'>
+                                                            <div className='text-center'>
+                                                                <Lock className='mx-auto h-10 w-10 opacity-20' />
+                                                                <p className='mt-2'>
+                                                                    {permissionSearch ? 'لم يتم العثور على صلاحيات' : 'لا توجد صلاحيات متاحة'}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className='space-y-2 p-4'>
+                                                            {Object.entries(filteredGroupedPermissions).map(([guardName, guardPermissions]) => {
+                                                                const guardSelected = guardPermissions.every((p: any) =>
+                                                                    field.value?.includes(p.name)
+                                                                )
+                                                                const isExpanded = expandedGroups[guardName] ?? true
+
+                                                                return (
+                                                                    <Collapsible
+                                                                        key={guardName}
+                                                                        open={isExpanded}
+                                                                        onOpenChange={(open) =>
+                                                                            setExpandedGroups(prev => ({ ...prev, [guardName]: open }))
+                                                                        }
+                                                                    >
+                                                                        <div className='rounded-lg border bg-card'>
+                                                                            <CollapsibleTrigger asChild>
+                                                                                <div className='flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 rounded-t-lg'>
+                                                                                    <div className='flex items-center gap-2'>
+                                                                                        <Shield className='h-4 w-4 text-muted-foreground' />
+                                                                                        <h4 className='text-sm font-semibold capitalize'>
+                                                                                            {guardName}
+                                                                                        </h4>
+                                                                                        <Badge variant='outline' className='text-xs'>
+                                                                                            {guardPermissions.length}
+                                                                                        </Badge>
+                                                                                    </div>
+                                                                                    <div className='flex items-center gap-1'>
+                                                                                        <Button
+                                                                                            type='button'
+                                                                                            variant='ghost'
+                                                                                            size='sm'
+                                                                                            className='h-6 px-1.5'
+                                                                                            onClick={(e) => {
+                                                                                                e.stopPropagation()
+                                                                                                if (guardSelected) {
+                                                                                                    handleDeselectGuardPermissions(guardName)
+                                                                                                } else {
+                                                                                                    handleSelectGuardPermissions(guardName)
+                                                                                                }
+                                                                                            }}
+                                                                                        >
+                                                                                            {guardSelected ? (
+                                                                                                <XSquare className='h-3 w-3' />
+                                                                                            ) : (
+                                                                                                <CheckSquare className='h-3 w-3' />
+                                                                                            )}
+                                                                                        </Button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </CollapsibleTrigger>
+                                                                            <CollapsibleContent>
+                                                                                <Separator />
+                                                                                <div className='p-3 pt-2 space-y-2'>
+                                                                                    {guardPermissions.map((permission: any) => (
+                                                                                        <div
+                                                                                            key={permission.id}
+                                                                                            className='flex items-center gap-2 rounded-md p-2 hover:bg-accent/50 transition-colors'
+                                                                                        >
+                                                                                            <Checkbox
+                                                                                                id={`permission-${permission.id}`}
+                                                                                                checked={field.value?.includes(permission.name) || false}
+                                                                                                onCheckedChange={(checked) => {
+                                                                                                    const currentPermissions = field.value || []
+                                                                                                    if (checked) {
+                                                                                                        field.onChange([...currentPermissions, permission.name])
+                                                                                                    } else {
+                                                                                                        field.onChange(currentPermissions.filter((p: string) => p !== permission.name))
+                                                                                                    }
+                                                                                                }}
+                                                                                            />
+                                                                                            <label
+                                                                                                htmlFor={`permission-${permission.id}`}
+                                                                                                className='flex-1 text-sm font-medium leading-none cursor-pointer select-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                                                                                            >
+                                                                                                {permission.name}
+                                                                                            </label>
+                                                                                        </div>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </CollapsibleContent>
+                                                                        </div>
+                                                                    </Collapsible>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </ScrollArea>
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
