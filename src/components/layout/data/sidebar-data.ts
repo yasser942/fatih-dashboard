@@ -80,11 +80,6 @@ export const sidebarData: SidebarData = {
           icon: MessagesSquare,
         },
         {
-          title: 'العملاء',
-          url: '/customers',
-          icon: Users,
-        },
-        {
           title: 'العملات',
           url: '/currencies',
           icon: Coins,
@@ -116,8 +111,29 @@ export const sidebarData: SidebarData = {
           ],
         },
         {
-          title: 'إدارة الموظفين',
+          title: 'إدارة المستخدمين',
           icon: Users,
+          items: [
+            {
+              title: 'المستخدمون',
+              url: '/users',
+              icon: UserCog,
+            },
+            {
+              title: 'الموظفون',
+              url: '/employees',
+              icon: UserCheck,
+            },
+            {
+              title: 'العملاء',
+              url: '/customers',
+              icon: Users,
+            },
+          ],
+        },
+        {
+          title: 'إدارة الموظفين',
+          icon: Briefcase,
           items: [
             {
               title: 'الأقسام',
@@ -128,11 +144,6 @@ export const sidebarData: SidebarData = {
               title: 'الوظائف',
               url: '/positions',
               icon: Briefcase,
-            },
-            {
-              title: 'الموظفون',
-              url: '/employees',
-              icon: UserCheck,
             },
           ],
         },

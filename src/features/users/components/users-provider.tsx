@@ -1,36 +1,39 @@
-import React, { useState } from 'react'
-import useDialogState from '@/hooks/use-dialog-state'
-import { type User } from '../data/schema'
-
-type UsersDialogType = 'invite' | 'add' | 'edit' | 'delete' | 'roles'
+import React, { createContext, useContext, useState } from 'react'
+import type { User } from '../data/schema'
 
 type UsersContextType = {
-  open: UsersDialogType | null
-  setOpen: (str: UsersDialogType | null) => void
+  open: 'create' | 'update' | 'delete' | 'roles' | 'permissions' | null
+  setOpen: (open: 'create' | 'update' | 'delete' | 'roles' | 'permissions' | null) => void
   currentRow: User | null
-  setCurrentRow: React.Dispatch<React.SetStateAction<User | null>>
+  setCurrentRow: (row: User | null) => void
+  refetch?: () => void
 }
 
-const UsersContext = React.createContext<UsersContextType | null>(null)
+const UsersContext = createContext<UsersContextType | undefined>(undefined)
 
-export function UsersProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useDialogState<UsersDialogType>(null)
+export function UsersProvider({
+  children,
+  refetch,
+}: {
+  children: React.ReactNode
+  refetch?: () => void
+}) {
+  const [open, setOpen] = useState<'create' | 'update' | 'delete' | 'roles' | 'permissions' | null>(
+    null,
+  )
   const [currentRow, setCurrentRow] = useState<User | null>(null)
 
   return (
-    <UsersContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <UsersContext.Provider value={{ open, setOpen, currentRow, setCurrentRow, refetch }}>
       {children}
-    </UsersContext>
+    </UsersContext.Provider>
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useUsers = () => {
-  const usersContext = React.useContext(UsersContext)
-
-  if (!usersContext) {
-    throw new Error('useUsers has to be used within <UsersContext>')
+export function useUsers() {
+  const context = useContext(UsersContext)
+  if (context === undefined) {
+    throw new Error('useUsers must be used within a UsersProvider')
   }
-
-  return usersContext
+  return context
 }

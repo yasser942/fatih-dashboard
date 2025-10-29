@@ -1,139 +1,60 @@
-import { useState } from 'react'
-import { type Table } from '@tanstack/react-table'
-import { Trash2, UserX, UserCheck, Mail } from 'lucide-react'
-import { toast } from 'sonner'
-import { sleep } from '@/lib/utils'
+import { Cross2Icon } from '@radix-ui/react-icons'
+import type { Table } from '@tanstack/react-table'
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
-import { DataTableBulkActions as BulkActionsToolbar } from '@/components/data-table'
-import { type User } from '../data/schema'
-import { UsersMultiDeleteDialog } from './users-multi-delete-dialog'
+import { useMutation } from '@apollo/client/react'
+import { BULK_DELETE_USERS_MUTATION } from '../graphql/mutations'
+import { USERS_QUERY } from '../graphql/queries'
+import { toast } from 'sonner'
+import { useUsers } from './users-provider'
+import type { User } from '../data/schema'
 
-type DataTableBulkActionsProps<TData> = {
+interface DataTableBulkActionsProps<TData> {
   table: Table<TData>
 }
 
-export function DataTableBulkActions<TData>({
-  table,
-}: DataTableBulkActionsProps<TData>) {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const selectedRows = table.getFilteredSelectedRowModel().rows
+export function DataTableBulkActions<TData>({ table }: DataTableBulkActionsProps<TData>) {
+  const { refetch } = useUsers()
 
-  const handleBulkStatusChange = (status: 'active' | 'inactive') => {
-    const selectedUsers = selectedRows.map((row) => row.original as User)
-    toast.promise(sleep(2000), {
-      loading: `${status === 'active' ? 'Activating' : 'Deactivating'} users...`,
-      success: () => {
-        table.resetRowSelection()
-        return `${status === 'active' ? 'Activated' : 'Deactivated'} ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}`
-      },
-      error: `Error ${status === 'active' ? 'activating' : 'deactivating'} users`,
-    })
-    table.resetRowSelection()
-  }
+  const [bulkDeleteUsers, { loading }] = useMutation(BULK_DELETE_USERS_MUTATION, {
+    refetchQueries: [USERS_QUERY],
+    onCompleted: () => {
+      toast.success('تم حذف المستخدمين بنجاح!')
+      table.toggleAllPageRowsSelected(false)
+      refetch?.()
+    },
+    onError: (error) => {
+      console.error('Bulk delete users error:', error)
+      toast.error('فشل في حذف المستخدمين')
+    },
+  })
 
-  const handleBulkInvite = () => {
-    const selectedUsers = selectedRows.map((row) => row.original as User)
-    toast.promise(sleep(2000), {
-      loading: 'Inviting users...',
-      success: () => {
-        table.resetRowSelection()
-        return `Invited ${selectedUsers.length} user${selectedUsers.length > 1 ? 's' : ''}`
-      },
-      error: 'Error inviting users',
-    })
-    table.resetRowSelection()
+  const handleBulkDelete = async () => {
+    const selectedRows = table.getFilteredSelectedRowModel().rows
+    const ids = selectedRows.map((row) => (row.original as User).id)
+
+    if (ids.length === 0) return
+
+    if (
+      !window.confirm(`هل أنت متأكد من حذف ${ids.length} مستخدم؟ لا يمكن التراجع عن هذا الإجراء.`)
+    ) {
+      return
+    }
+
+    await bulkDeleteUsers({ variables: { ids } })
   }
 
   return (
-    <>
-      <BulkActionsToolbar table={table} entityName='user'>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant='outline'
-              size='icon'
-              onClick={handleBulkInvite}
-              className='size-8'
-              aria-label='Invite selected users'
-              title='Invite selected users'
-            >
-              <Mail />
-              <span className='sr-only'>Invite selected users</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Invite selected users</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant='outline'
-              size='icon'
-              onClick={() => handleBulkStatusChange('active')}
-              className='size-8'
-              aria-label='Activate selected users'
-              title='Activate selected users'
-            >
-              <UserCheck />
-              <span className='sr-only'>Activate selected users</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Activate selected users</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant='outline'
-              size='icon'
-              onClick={() => handleBulkStatusChange('inactive')}
-              className='size-8'
-              aria-label='Deactivate selected users'
-              title='Deactivate selected users'
-            >
-              <UserX />
-              <span className='sr-only'>Deactivate selected users</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Deactivate selected users</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant='destructive'
-              size='icon'
-              onClick={() => setShowDeleteConfirm(true)}
-              className='size-8'
-              aria-label='Delete selected users'
-              title='Delete selected users'
-            >
-              <Trash2 />
-              <span className='sr-only'>Delete selected users</span>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Delete selected users</p>
-          </TooltipContent>
-        </Tooltip>
-      </BulkActionsToolbar>
-
-      <UsersMultiDeleteDialog
-        table={table}
-        open={showDeleteConfirm}
-        onOpenChange={setShowDeleteConfirm}
-      />
-    </>
+    <div className='flex items-center gap-2'>
+      <Button
+        variant='outline'
+        size='sm'
+        onClick={handleBulkDelete}
+        disabled={loading}
+        className='h-8 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground'
+      >
+        <Cross2Icon className='me-2 size-4' />
+        حذف ({table.getFilteredSelectedRowModel().rows.length})
+      </Button>
+    </div>
   )
 }

@@ -1,8 +1,4 @@
-import { useState } from 'react'
-import { useMutation, useQuery } from '@apollo/client/react'
-import { toast } from 'sonner'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Button } from '@/components/ui/button'
+import { useEffect, useState } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -11,145 +7,112 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { type User } from '../data/schema'
-import { SYNC_ROLES_MUTATION } from '../graphql/mutations'
-import { ROLES_QUERY } from '../graphql/queries'
+import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
+import { useMutation, useQuery } from '@apollo/client/react'
+import { gql } from '@apollo/client/core'
+import { ASSIGN_ROLES_MUTATION } from '../graphql/mutations'
+import { USERS_QUERY } from '../graphql/queries'
+import { toast } from 'sonner'
+import { useUsers } from './users-provider'
 
-type UserRolesDialogProps = {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    currentUser: User
-}
+const ROLES_QUERY = gql`
+  query Roles {
+    roles {
+      id
+      name
+    }
+  }
+`
 
-export function UserRolesDialog({
-    open,
-    onOpenChange,
-    currentUser,
-}: UserRolesDialogProps) {
-    const [selectedRoles, setSelectedRoles] = useState<string[]>(
-        currentUser.roles?.map(role => role.name) || []
-    )
+export function UsersRolesDialog() {
+    const { open, setOpen, currentRow, setCurrentRow, refetch } = useUsers()
+    const [selectedRoles, setSelectedRoles] = useState<number[]>([])
 
-    // Fetch all available roles
-    const { data: rolesData, loading: rolesLoading } = useQuery(ROLES_QUERY)
+    const { data: rolesData } = useQuery(ROLES_QUERY)
 
-    const [syncRoles, { loading }] = useMutation(SYNC_ROLES_MUTATION, {
+    const [assignRoles, { loading }] = useMutation(ASSIGN_ROLES_MUTATION, {
+        refetchQueries: [USERS_QUERY],
         onCompleted: () => {
-            toast.success('User roles updated successfully!')
-            onOpenChange(false)
+            toast.success('تم تحديث الأدوار بنجاح!')
+            handleClose()
+            refetch?.()
         },
-        onError: (error: any) => {
-            console.error('Sync roles error:', error)
-            if (error.graphQLErrors && error.graphQLErrors.length > 0) {
-                toast.error(error.graphQLErrors[0].message)
-            } else {
-                toast.error('Failed to update user roles')
-            }
+        onError: (error) => {
+            console.error('Assign roles error:', error)
+            toast.error('فشل في تحديث الأدوار')
         },
     })
 
-    const handleSave = () => {
-        syncRoles({
+    useEffect(() => {
+        if (open === 'roles' && currentRow) {
+            const roleIds = currentRow.roles?.map((role) => role.id) || []
+            setSelectedRoles(roleIds)
+        }
+    }, [open, currentRow])
+
+    const handleClose = () => {
+        setOpen(null)
+        setCurrentRow(null)
+        setSelectedRoles([])
+    }
+
+    const handleToggleRole = (roleId: number) => {
+        setSelectedRoles((prev) =>
+            prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId],
+        )
+    }
+
+    const handleSubmit = async () => {
+        if (!currentRow) return
+        await assignRoles({
             variables: {
-                user_id: currentUser.id,
-                roles: selectedRoles,
+                id: currentRow.id,
+                input: { role_ids: selectedRoles },
             },
         })
     }
 
-    const handleRoleToggle = (roleName: string, checked: boolean) => {
-        if (checked) {
-            setSelectedRoles(prev => [...prev, roleName])
-        } else {
-            setSelectedRoles(prev => prev.filter(name => name !== roleName))
-        }
-    }
-
     const roles = rolesData?.roles || []
 
-    // Group roles by guard_name
-    const groupedRoles = roles.reduce((acc: Record<string, any[]>, role: any) => {
-        if (!acc[role.guard_name]) {
-            acc[role.guard_name] = []
-        }
-        acc[role.guard_name].push(role)
-        return acc
-    }, {})
-
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className='max-w-2xl'>
+        <Dialog open={open === 'roles'} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+            <DialogContent className='sm:max-w-[425px]'>
                 <DialogHeader>
-                    <DialogTitle>Manage Roles for {currentUser.name || currentUser.email}</DialogTitle>
+                    <DialogTitle>إدارة أدوار المستخدم</DialogTitle>
                     <DialogDescription>
-                        Assign or remove roles for this user. Changes will take effect immediately.
+                        إدارة أدوار المستخدم: <strong>{currentRow?.name || currentRow?.full_name}</strong>
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className='space-y-4'>
-                    <div className='flex items-center gap-2'>
-                        <span className='text-sm font-medium'>Selected Roles:</span>
-                        {selectedRoles.length > 0 ? (
-                            <div className='flex flex-wrap gap-1'>
-                                {selectedRoles.map((roleName) => (
-                                    <Badge key={roleName} variant='secondary' className='text-xs'>
-                                        {roleName}
-                                    </Badge>
-                                ))}
-                            </div>
-                        ) : (
-                            <span className='text-sm text-muted-foreground'>No roles selected</span>
-                        )}
-                    </div>
-
-                    <ScrollArea className='h-64 w-full rounded-md border p-4'>
-                        {rolesLoading ? (
-                            <div className='text-center text-sm text-muted-foreground'>
-                                Loading roles...
-                            </div>
-                        ) : Object.keys(groupedRoles).length === 0 ? (
-                            <div className='text-center text-sm text-muted-foreground'>
-                                No roles available
-                            </div>
-                        ) : (
-                            <div className='space-y-4'>
-                                {Object.entries(groupedRoles).map(([guardName, guardRoles]) => (
-                                    <div key={guardName}>
-                                        <h4 className='text-sm font-medium capitalize'>{guardName} Guard</h4>
-                                        <div className='mt-2 space-y-2'>
-                                            {guardRoles.map((role) => (
-                                                <div key={role.id} className='flex items-center space-x-2'>
-                                                    <Checkbox
-                                                        id={`role-${role.id}`}
-                                                        checked={selectedRoles.includes(role.name)}
-                                                        onCheckedChange={(checked) => handleRoleToggle(role.name, !!checked)}
-                                                    />
-                                                    <label
-                                                        htmlFor={`role-${role.id}`}
-                                                        className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                                                    >
-                                                        {role.name}
-                                                    </label>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <Separator className='mt-4' />
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </ScrollArea>
+                <div className='space-y-4 py-4'>
+                    {roles.length === 0 ? (
+                        <div className='text-center text-muted-foreground'>لا توجد أدوار متاحة</div>
+                    ) : (
+                        <div className='space-y-3'>
+                            {roles.map((role: any) => (
+                                <div key={role.id} className='flex items-center space-x-2'>
+                                    <Checkbox
+                                        id={`role-${role.id}`}
+                                        checked={selectedRoles.includes(role.id)}
+                                        onCheckedChange={() => handleToggleRole(role.id)}
+                                    />
+                                    <Label htmlFor={`role-${role.id}`} className='text-sm font-normal cursor-pointer'>
+                                        {role.name}
+                                    </Label>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter>
-                    <Button variant='outline' onClick={() => onOpenChange(false)}>
-                        Cancel
+                    <Button type='button' variant='outline' onClick={handleClose} disabled={loading}>
+                        إلغاء
                     </Button>
-                    <Button onClick={handleSave} disabled={loading}>
-                        {loading ? 'Saving...' : 'Save Changes'}
+                    <Button type='button' onClick={handleSubmit} disabled={loading}>
+                        {loading ? 'جاري الحفظ...' : 'حفظ'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

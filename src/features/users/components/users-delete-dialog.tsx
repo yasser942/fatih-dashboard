@@ -1,81 +1,62 @@
-'use client'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { useMutation } from '@apollo/client/react'
+import { DELETE_USER_MUTATION } from '../graphql/mutations'
+import { USERS_QUERY } from '../graphql/queries'
+import { toast } from 'sonner'
+import { useUsers } from './users-provider'
 
-import { useState } from 'react'
-import { AlertTriangle } from 'lucide-react'
-import { showSubmittedData } from '@/lib/show-submitted-data'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { ConfirmDialog } from '@/components/confirm-dialog'
-import { type User } from '../data/schema'
+export function UsersDeleteDialog() {
+  const { open, setOpen, currentRow, setCurrentRow, refetch } = useUsers()
 
-type UserDeleteDialogProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  currentRow: User
-}
+  const [deleteUser, { loading }] = useMutation(DELETE_USER_MUTATION, {
+    refetchQueries: [USERS_QUERY],
+    onCompleted: () => {
+      toast.success('تم حذف المستخدم بنجاح!')
+      handleClose()
+      refetch?.()
+    },
+    onError: (error) => {
+      console.error('Delete user error:', error)
+      toast.error('فشل في حذف المستخدم')
+    },
+  })
 
-export function UsersDeleteDialog({
-  open,
-  onOpenChange,
-  currentRow,
-}: UserDeleteDialogProps) {
-  const [value, setValue] = useState('')
+  const handleClose = () => {
+    setOpen(null)
+    setCurrentRow(null)
+  }
 
-  const handleDelete = () => {
-    if (value.trim() !== currentRow.username) return
-
-    onOpenChange(false)
-    showSubmittedData(currentRow, 'The following user has been deleted:')
+  const handleDelete = async () => {
+    if (!currentRow) return
+    await deleteUser({ variables: { id: currentRow.id } })
   }
 
   return (
-    <ConfirmDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      handleConfirm={handleDelete}
-      disabled={value.trim() !== currentRow.username}
-      title={
-        <span className='text-destructive'>
-          <AlertTriangle
-            className='stroke-destructive me-1 inline-block'
-            size={18}
-          />{' '}
-          Delete User
-        </span>
-      }
-      desc={
-        <div className='space-y-4'>
-          <p className='mb-2'>
-            Are you sure you want to delete{' '}
-            <span className='font-bold'>{currentRow.username}</span>?
-            <br />
-            This action will permanently remove the user with the role of{' '}
-            <span className='font-bold'>
-              {currentRow.role.toUpperCase()}
-            </span>{' '}
-            from the system. This cannot be undone.
-          </p>
-
-          <Label className='my-2'>
-            Username:
-            <Input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder='Enter username to confirm deletion.'
-            />
-          </Label>
-
-          <Alert variant='destructive'>
-            <AlertTitle>Warning!</AlertTitle>
-            <AlertDescription>
-              Please be careful, this operation can not be rolled back.
-            </AlertDescription>
-          </Alert>
-        </div>
-      }
-      confirmText='Delete'
-      destructive
-    />
+    <AlertDialog open={open === 'delete'} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+          <AlertDialogDescription>
+            سيتم حذف المستخدم <strong>{currentRow?.name || currentRow?.full_name}</strong> نهائياً.
+            لا يمكن التراجع عن هذا الإجراء.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={loading}>إلغاء</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} disabled={loading} className='bg-destructive text-destructive-foreground hover:bg-destructive/90'>
+            {loading ? 'جاري الحذف...' : 'حذف'}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

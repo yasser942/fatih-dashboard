@@ -1,64 +1,15 @@
-import { UsersActionDialog } from './users-action-dialog'
+import { UsersMutateDrawer } from './users-mutate-drawer'
 import { UsersDeleteDialog } from './users-delete-dialog'
-import { UsersInviteDialog } from './users-invite-dialog'
-import { UserRolesDialog } from './users-roles-dialog'
-import { useUsers } from './users-provider'
+import { UsersRolesDialog } from './users-roles-dialog'
+import { UsersPermissionsDialog } from './users-permissions-dialog'
 
 export function UsersDialogs() {
-  const { open, setOpen, currentRow, setCurrentRow } = useUsers()
   return (
     <>
-      <UsersActionDialog
-        key='user-add'
-        open={open === 'add'}
-        onOpenChange={() => setOpen('add')}
-      />
-
-      <UsersInviteDialog
-        key='user-invite'
-        open={open === 'invite'}
-        onOpenChange={() => setOpen('invite')}
-      />
-
-      {currentRow && (
-        <>
-          <UsersActionDialog
-            key={`user-edit-${currentRow.id}`}
-            open={open === 'edit'}
-            onOpenChange={() => {
-              setOpen('edit')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
-            }}
-            currentRow={currentRow}
-          />
-
-          <UsersDeleteDialog
-            key={`user-delete-${currentRow.id}`}
-            open={open === 'delete'}
-            onOpenChange={() => {
-              setOpen('delete')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
-            }}
-            currentRow={currentRow}
-          />
-
-          <UserRolesDialog
-            key={`user-roles-${currentRow.id}`}
-            open={open === 'roles'}
-            onOpenChange={() => {
-              setOpen('roles')
-              setTimeout(() => {
-                setCurrentRow(null)
-              }, 500)
-            }}
-            currentUser={currentRow}
-          />
-        </>
-      )}
+      <UsersMutateDrawer />
+      <UsersDeleteDialog />
+      <UsersRolesDialog />
+      <UsersPermissionsDialog />
     </>
   )
 }

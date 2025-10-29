@@ -78,6 +78,36 @@ export type EmployeesPaginatedResponse = {
     paginatorInfo: PaginatorInfo
 }
 
+// New schemas for inline user creation (no user dropdown)
+export const createEmployeeWithUserSchema = z.object({
+    branch_id: z.coerce.number().min(1, 'يجب اختيار الفرع'),
+    department_id: z.coerce.number().min(1, 'يجب اختيار القسم'),
+    position_id: z.coerce.number().min(1, 'يجب اختيار الوظيفة'),
+    hired_date: z.string().min(1, 'يجب إدخال تاريخ التوظيف'),
+    salary: z.coerce.number().min(0, 'الراتب يجب أن يكون أكبر من أو يساوي 0'),
+    contract_type: z.enum(employeeContractTypeValues),
+    status: z.enum(employeeStatusValues),
+    supervisor_id: z.coerce.number().optional(),
+    // User fields
+    user_name: z.string().min(1, 'الاسم مطلوب'),
+    user_email: z.string().email('البريد الإلكتروني غير صحيح'),
+    user_password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+    user_status: z.enum(['Active', 'Inactive', 'Pending', 'Blocked'] as const),
+})
 
+export const updateEmployeeWithUserSchema = createEmployeeWithUserSchema.partial().extend({
+    // For update, still require core employee fields
+    branch_id: z.coerce.number().min(1, 'يجب اختيار الفرع').optional(),
+    department_id: z.coerce.number().min(1, 'يجب اختيار القسم').optional(),
+    position_id: z.coerce.number().min(1, 'يجب اختيار الوظيفة').optional(),
+    hired_date: z.string().min(1, 'يجب إدخال تاريخ التوظيف').optional(),
+    salary: z.coerce.number().min(0, 'الراتب يجب أن يكون أكبر من أو يساوي 0').optional(),
+    contract_type: z.enum(employeeContractTypeValues).optional(),
+    status: z.enum(employeeStatusValues).optional(),
+    supervisor_id: z.coerce.number().optional(),
+    // Make password optional when updating
+    user_password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل').optional(),
+})
 
-
+export type CreateEmployeeWithUser = z.infer<typeof createEmployeeWithUserSchema>
+export type UpdateEmployeeWithUser = z.infer<typeof updateEmployeeWithUserSchema>

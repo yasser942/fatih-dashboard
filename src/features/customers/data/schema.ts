@@ -47,3 +47,16 @@ export type CustomersPaginatedResponse = {
     data: Customer[]
     paginatorInfo: PaginatorInfo
 }
+
+// Extended schema to allow creating a new user inline instead of selecting existing user
+export const createCustomerWithUserSchema = z.object({
+    customer_type: z.enum(customerTypeValues),
+    market_name: z.string().optional(),
+    status: z.enum(customerStatusValues),
+    user_name: z.string().min(1, 'الاسم مطلوب'),
+    user_email: z.string().email('البريد الإلكتروني غير صحيح'),
+    user_password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+    user_status: z.enum(['Active', 'Inactive', 'Pending', 'Blocked'] as const),
+})
+
+export type CreateCustomerWithUser = z.infer<typeof createCustomerWithUserSchema>

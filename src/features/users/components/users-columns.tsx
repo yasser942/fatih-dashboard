@@ -1,12 +1,24 @@
-import { type ColumnDef } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
+import type { ColumnDef } from '@tanstack/react-table'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Badge } from '@/components/ui/badge'
 import { DataTableColumnHeader } from '@/components/data-table'
-import { LongText } from '@/components/long-text'
-import { callTypes, roles } from '../data/data'
-import { type User } from '../data/schema'
 import { DataTableRowActions } from './data-table-row-actions'
+import type { User, UserStatus } from '../data/schema'
+import { formatDate } from '@/lib/utils'
+
+const statusColors: Record<UserStatus, string> = {
+  Active: 'bg-green-500/10 text-green-500 hover:bg-green-500/20',
+  Inactive: 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20',
+  Pending: 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20',
+  Blocked: 'bg-red-500/10 text-red-500 hover:bg-red-500/20',
+}
+
+const statusLabels: Record<UserStatus, string> = {
+  Active: 'نشط',
+  Inactive: 'غير نشط',
+  Pending: 'معلق',
+  Blocked: 'محظور',
+}
 
 export const usersColumns: ColumnDef<User>[] = [
   {
@@ -14,134 +26,113 @@ export const usersColumns: ColumnDef<User>[] = [
     header: ({ table }) => (
       <Checkbox
         checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && 'indeterminate')
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label='Select all'
-        className='translate-y-[2px]'
+        aria-label='اختيار الكل'
       />
     ),
-    meta: {
-      className: cn('max-md:sticky start-0 z-10 rounded-tl-[inherit]'),
-    },
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label='Select row'
-        className='translate-y-[2px]'
+        aria-label='اختيار الصف'
       />
     ),
     enableSorting: false,
     enableHiding: false,
   },
   {
-    accessorKey: 'username',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Username' />
-    ),
-    cell: ({ row }) => (
-      <LongText className='max-w-36 ps-3'>{row.getValue('username')}</LongText>
-    ),
-    meta: {
-      className: cn(
-        'drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)]',
-        'ps-0.5 max-md:sticky start-6 @4xl/content:table-cell @4xl/content:drop-shadow-none'
-      ),
-    },
+    accessorKey: 'id',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='ID' />,
+    cell: ({ row }) => <div className='w-[80px]'>{row.getValue('id')}</div>,
+    enableSorting: true,
     enableHiding: false,
   },
   {
-    id: 'fullName',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Name' />
-    ),
+    accessorKey: 'full_name',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='الاسم الكامل' />,
     cell: ({ row }) => {
-      const { firstName, lastName } = row.original
-      const fullName = `${firstName} ${lastName}`
-      return <LongText className='max-w-36'>{fullName}</LongText>
+      const fullName = row.getValue('full_name') as string | null
+      const name = row.original.name
+      return <div className='max-w-[200px] truncate font-medium'>{fullName || name}</div>
     },
-    meta: { className: 'w-36' },
+    enableSorting: true,
   },
   {
     accessorKey: 'email',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Email' />
-    ),
-    cell: ({ row }) => (
-      <div className='w-fit ps-2 text-nowrap'>{row.getValue('email')}</div>
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title='البريد الإلكتروني' />,
+    cell: ({ row }) => <div className='max-w-[200px] truncate'>{row.getValue('email')}</div>,
+    enableSorting: true,
   },
   {
-    accessorKey: 'phoneNumber',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Phone Number' />
-    ),
-    cell: ({ row }) => <div>{row.getValue('phoneNumber')}</div>,
+    accessorKey: 'phone',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='الهاتف' />,
+    cell: ({ row }) => {
+      const phone = row.getValue('phone') as string | null
+      return <div className='max-w-[150px] truncate'>{phone || '-'}</div>
+    },
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'Job',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='الوظيفة' />,
+    cell: ({ row }) => {
+      const job = row.getValue('Job') as string | null
+      return <div className='max-w-[150px] truncate'>{job || '-'}</div>
+    },
     enableSorting: false,
   },
   {
     accessorKey: 'status',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
-    ),
+    header: ({ column }) => <DataTableColumnHeader column={column} title='الحالة' />,
     cell: ({ row }) => {
-      const { status } = row.original
-      const badgeColor = callTypes.get(status)
+      const status = row.getValue('status') as UserStatus
       return (
-        <div className='flex space-x-2'>
-          <Badge variant='outline' className={cn('capitalize', badgeColor)}>
-            {row.getValue('status')}
-          </Badge>
-        </div>
+        <Badge variant='outline' className={statusColors[status]}>
+          {statusLabels[status]}
+        </Badge>
       )
     },
+    enableSorting: true,
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
-    enableHiding: false,
-    enableSorting: false,
   },
   {
     accessorKey: 'roles',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Roles' />
-    ),
+    header: 'الأدوار',
     cell: ({ row }) => {
-      const userRoles = row.original.roles || []
-      const roleCount = userRoles.length
-
+      const roles = row.original.roles || []
+      if (roles.length === 0) return <div className='text-muted-foreground'>-</div>
       return (
         <div className='flex flex-wrap gap-1'>
-          {roleCount > 0 ? (
-            <>
-              {userRoles.slice(0, 2).map((role) => (
-                <Badge key={role.id} variant='outline' className='text-xs'>
-                  {role.name}
-                </Badge>
-              ))}
-              {userRoles.length > 2 && (
-                <Badge variant='secondary' className='text-xs'>
-                  +{userRoles.length - 2} more
-                </Badge>
-              )}
-            </>
-          ) : (
-            <span className='text-muted-foreground text-sm'>No roles</span>
+          {roles.slice(0, 2).map((role) => (
+            <Badge key={role.id} variant='secondary' className='text-xs'>
+              {role.name}
+            </Badge>
+          ))}
+          {roles.length > 2 && (
+            <Badge variant='secondary' className='text-xs'>
+              +{roles.length - 2}
+            </Badge>
           )}
         </div>
       )
     },
-    filterFn: (row, id, value) => {
-      const userRoles = row.original.roles || []
-      return userRoles.some(role => value.includes(role.name))
-    },
     enableSorting: false,
-    enableHiding: false,
+  },
+  {
+    accessorKey: 'created_at',
+    header: ({ column }) => <DataTableColumnHeader column={column} title='تاريخ الإنشاء' />,
+    cell: ({ row }) => {
+      const date = row.getValue('created_at') as string
+      return <div className='text-muted-foreground'>{formatDate(date)}</div>
+    },
+    enableSorting: true,
   },
   {
     id: 'actions',
-    cell: DataTableRowActions,
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ]
