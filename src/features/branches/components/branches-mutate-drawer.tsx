@@ -1,21 +1,27 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@apollo/client/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Check, ChevronsUpDown, MapPin } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { useBranches } from './branches-provider'
 import { branchStatusValues, createBranchSchema, updateBranchSchema, type CreateBranch, type UpdateBranch } from '../data/schema'
 import { CREATE_BRANCH_MUTATION, UPDATE_BRANCH_MUTATION } from '../graphql/mutations'
-import { BRANCHES_QUERY } from '../graphql/queries'
+import { BRANCHES_PAGINATED_QUERY } from '../graphql/queries'
 import { LOCATION_MASTERS_QUERY } from '@/features/location-masters/graphql/queries'
 
 export function BranchesMutateDrawer() {
     const { open, setOpen, currentRow, setCurrentRow, refetch } = useBranches()
     const isUpdate = open === 'update' && currentRow
+    const [locationOpen, setLocationOpen] = useState(false)
 
     const form = useForm<CreateBranch | UpdateBranch>({
         resolver: zodResolver(isUpdate ? updateBranchSchema : createBranchSchema),
@@ -46,18 +52,26 @@ export function BranchesMutateDrawer() {
     }, [open, currentRow])
 
     const [createBranch, createState] = useMutation(CREATE_BRANCH_MUTATION, {
-        refetchQueries: [BRANCHES_QUERY],
+        refetchQueries: [BRANCHES_PAGINATED_QUERY],
         onCompleted: () => {
+            toast.success('تم إنشاء الفرع بنجاح!')
             handleClose()
             refetch?.()
+        },
+        onError: (error) => {
+            toast.error(`فشل في إنشاء الفرع: ${error.message}`)
         },
     })
 
     const [updateBranch, updateState] = useMutation(UPDATE_BRANCH_MUTATION, {
-        refetchQueries: [BRANCHES_QUERY],
+        refetchQueries: [BRANCHES_PAGINATED_QUERY],
         onCompleted: () => {
+            toast.success('تم تحديث الفرع بنجاح!')
             handleClose()
             refetch?.()
+        },
+        onError: (error) => {
+            toast.error(`فشل في تحديث الفرع: ${error.message}`)
         },
     })
 
@@ -139,21 +153,65 @@ export function BranchesMutateDrawer() {
                                 <FormItem>
                                     <FormLabel>الموقع</FormLabel>
                                     <FormControl>
-                                        <Select
-                                            value={field.value ? String(field.value) : ''}
-                                            onValueChange={(val) => field.onChange(Number(val))}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="اختر الموقع" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {(locationsData?.locationMasters ?? []).map((loc: any) => (
-                                                    <SelectItem key={loc.id} value={String(loc.id)}>
-                                                        {loc.Location_Pcode} - {loc.country_ar}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <Popover open={locationOpen} onOpenChange={setLocationOpen}>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    aria-expanded={locationOpen}
+                                                    className="w-full justify-between"
+                                                >
+                                                    {field.value && field.value > 0
+                                                        ? (() => {
+                                                            const location = (locationsData?.locationMasters ?? []).find(
+                                                                (loc: any) => Number(loc.id) === Number(field.value)
+                                                            )
+                                                            return location
+                                                                ? `${location.Location_Pcode} - ${location.country_ar}`
+                                                                : 'اختر الموقع...'
+                                                        })()
+                                                        : 'اختر الموقع...'}
+                                                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="البحث في المواقع..." />
+                                                    <CommandList>
+                                                        <CommandEmpty>لم يتم العثور على مواقع.</CommandEmpty>
+                                                        <CommandGroup>
+                                                            {(locationsData?.locationMasters ?? []).map((loc: any) => (
+                                                                <CommandItem
+                                                                    key={loc.id}
+                                                                    value={`${loc.Location_Pcode} ${loc.country_ar}`}
+                                                                    onSelect={() => {
+                                                                        field.onChange(Number(loc.id))
+                                                                        setLocationOpen(false)
+                                                                        form.clearErrors('location_id')
+                                                                    }}
+                                                                >
+                                                                    <Check
+                                                                        className={cn(
+                                                                            'mr-2 h-4 w-4',
+                                                                            field.value === Number(loc.id) && field.value > 0
+                                                                                ? 'opacity-100'
+                                                                                : 'opacity-0'
+                                                                        )}
+                                                                    />
+                                                                    <MapPin className="mr-2 h-4 w-4" />
+                                                                    <div className="flex flex-col">
+                                                                        <span className="font-medium">{loc.Location_Pcode}</span>
+                                                                        <span className="text-sm text-muted-foreground">
+                                                                            {loc.country_ar}
+                                                                        </span>
+                                                                    </div>
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandGroup>
+                                                    </CommandList>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -180,9 +238,15 @@ export function BranchesMutateDrawer() {
                                 name="latitude"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Latitude</FormLabel>
+                                        <FormLabel>خط العرض (Latitude)</FormLabel>
                                         <FormControl>
-                                            <Input type="number" step="0.0000001" value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value)} />
+                                            <Input
+                                                type="number"
+                                                step="0.0000001"
+                                                placeholder="0.000000"
+                                                value={field.value ?? ''}
+                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -193,9 +257,15 @@ export function BranchesMutateDrawer() {
                                 name="longitude"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Longitude</FormLabel>
+                                        <FormLabel>خط الطول (Longitude)</FormLabel>
                                         <FormControl>
-                                            <Input type="number" step="0.0000001" value={field.value ?? ''} onChange={(e) => field.onChange(e.target.value)} />
+                                            <Input
+                                                type="number"
+                                                step="0.0000001"
+                                                placeholder="0.000000"
+                                                value={field.value ?? ''}
+                                                onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                            />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

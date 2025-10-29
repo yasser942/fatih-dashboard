@@ -1,10 +1,32 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import { CheckCircle, XCircle } from 'lucide-react'
 import { type Branch } from '../data/schema'
 import { DataTableRowActions } from './data-table-row-actions'
 
 export const branchesColumns: ColumnDef<Branch>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="تحديد الكل"
+                onClick={(e) => e.stopPropagation()}
+            />
+        ),
+        cell: ({ row }) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={(value) => row.toggleSelected(!!value)}
+                aria-label="تحديد الصف"
+                onClick={(e) => e.stopPropagation()}
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         accessorKey: 'name',
         header: 'اسم الفرع',

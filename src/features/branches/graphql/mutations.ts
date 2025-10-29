@@ -39,4 +39,16 @@ export const DELETE_BRANCH_MUTATION = gql`
   }
 `
 
+export const BULK_DELETE_BRANCHES_MUTATION = gql`
+  mutation BulkDeleteBranches($ids: [ID!]!) {
+    bulkDeleteBranches(ids: $ids)
+  }
+`
+
+export const BULK_UPDATE_BRANCHES_STATUS_MUTATION = gql`
+  mutation BulkUpdateBranchesStatus($ids: [ID!]!, $status: BranchStatus!) {
+    bulkUpdateBranchesStatus(ids: $ids, status: $status)
+  }
+`
+
 

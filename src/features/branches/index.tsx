@@ -1,4 +1,5 @@
 import { useQuery } from '@apollo/client/react'
+import { getRouteApi } from '@tanstack/react-router'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
@@ -9,34 +10,38 @@ import { BranchesProvider } from './components/branches-provider'
 import { BranchesDialogs } from './components/branches-dialogs'
 import { BranchesPrimaryButtons } from './components/branches-primary-buttons'
 import { BranchesTable } from './components/branches-table'
-import { BRANCHES_QUERY } from './graphql/queries'
+import { BRANCHES_PAGINATED_QUERY } from './graphql/queries'
 import { type Branch } from './data/schema'
 
-type BranchesQueryResponse = { branches: Branch[] }
+const route = getRouteApi('/_authenticated/branches/')
+
+type BranchesPaginatedResponse = {
+    branchesPaginated: {
+        data: Branch[]
+        paginatorInfo: {
+            count: number
+            currentPage: number
+            firstItem: number | null
+            hasMorePages: boolean
+            lastItem: number | null
+            perPage: number
+            total: number
+        }
+    }
+}
 
 export function Branches() {
-    const { data, loading, error, refetch } = useQuery<BranchesQueryResponse>(BRANCHES_QUERY, { errorPolicy: 'all' })
+    const search = route.useSearch()
 
-    if (loading) {
-        return (
-            <div className='flex h-screen items-center justify-center'>
-                <div className='text-center'>
-                    <div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
-                    <p className='mt-2 text-sm text-muted-foreground'>جاري تحميل الفروع...</p>
-                </div>
-            </div>
-        )
-    }
-
-    if (error) {
-        return (
-            <div className='flex h-screen items-center justify-center'>
-                <div className='text-center'>
-                    <p className='text-destructive'>خطأ في تحميل الفروع: {error.message}</p>
-                </div>
-            </div>
-        )
-    }
+    const { data, loading, error, refetch } = useQuery<BranchesPaginatedResponse>(BRANCHES_PAGINATED_QUERY, {
+        variables: {
+            first: search.per_page || 10,
+            page: search.page || 1,
+            search: search.search || undefined,
+            status: search.status || undefined,
+        },
+        errorPolicy: 'all',
+    })
 
     return (
         <BranchesProvider refetch={refetch}>
@@ -57,7 +62,12 @@ export function Branches() {
                     </div>
                     <BranchesPrimaryButtons />
                 </div>
-                <BranchesTable data={data?.branches || []} />
+                <BranchesTable
+                    data={data?.branchesPaginated.data || []}
+                    paginationInfo={data?.branchesPaginated.paginatorInfo}
+                    loading={loading}
+                    error={error}
+                />
             </Main>
 
             <BranchesDialogs />

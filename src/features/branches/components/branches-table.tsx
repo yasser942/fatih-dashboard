@@ -7,11 +7,10 @@ import {
     getCoreRowModel,
     getFacetedRowModel,
     getFacetedUniqueValues,
-    getFilteredRowModel,
-    getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
 } from '@tanstack/react-table'
+import { CheckCircle, XCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -19,21 +18,38 @@ import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { type Branch } from '../data/schema'
 import { branchesColumns as columns } from './branches-columns'
 import { useBranches } from './branches-provider'
+import { DataTableBulkActions } from './data-table-bulk-actions'
 
 const route = getRouteApi('/_authenticated/branches/')
 
-type DataTableProps = { data: Branch[] }
+type DataTableProps = {
+    data: Branch[]
+    paginationInfo?: {
+        count: number
+        currentPage: number
+        hasMorePages: boolean
+        perPage: number
+        total: number
+    }
+    loading?: boolean
+    error?: any
+}
 
-export function BranchesTable({ data }: DataTableProps) {
-    const [rowSelection, setRowSelection] = useState({})
+export function BranchesTable({ data, paginationInfo, loading, error }: DataTableProps) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+    const [rowSelection, setRowSelection] = useState({})
     const { setCurrentRow, setOpen } = useBranches()
 
     const { globalFilter, onGlobalFilterChange, columnFilters, onColumnFiltersChange, pagination, onPaginationChange } =
         useTableUrlState({
             search: route.useSearch(),
             navigate: route.useNavigate(),
+            globalFilter: {
+                enabled: true,
+                key: 'search',
+                trim: true,
+            },
         })
 
     const table = useReactTable({
@@ -48,8 +64,10 @@ export function BranchesTable({ data }: DataTableProps) {
         onGlobalFilterChange,
         onPaginationChange,
         getCoreRowModel: getCoreRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
+        // Enable server-side pagination and filtering
+        manualPagination: true,
+        manualFiltering: true,
+        pageCount: paginationInfo ? Math.ceil(paginationInfo.total / paginationInfo.perPage) : -1,
         getSortedRowModel: getSortedRowModel(),
         getFacetedRowModel: getFacetedRowModel(),
         getFacetedUniqueValues: getFacetedUniqueValues(),
@@ -61,14 +79,27 @@ export function BranchesTable({ data }: DataTableProps) {
 
     return (
         <div className="space-y-4">
-            <DataTableToolbar table={table} filterKey="name" filterPlaceholder="البحث في الفروع..." />
+            <DataTableToolbar
+                table={table}
+                searchPlaceholder="البحث في الفروع..."
+                filters={[
+                    {
+                        columnId: 'status',
+                        title: 'الحالة',
+                        options: [
+                            { label: 'نشط', value: 'Active', icon: CheckCircle },
+                            { label: 'غير نشط', value: 'Inactive', icon: XCircle },
+                        ],
+                    },
+                ]}
+            />
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className={cn(header.column.columnDef.meta?.className)}>
+                                    <TableHead key={header.id} className={cn(header.column.columnDef.meta?.thClassName)}>
                                         {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                                     </TableHead>
                                 ))}
@@ -76,7 +107,19 @@ export function BranchesTable({ data }: DataTableProps) {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-24 text-center">
+                                    جاري التحميل...
+                                </TableCell>
+                            </TableRow>
+                        ) : error ? (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="h-24 text-center text-red-500">
+                                    حدث خطأ في تحميل البيانات
+                                </TableCell>
+                            </TableRow>
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
@@ -105,6 +148,7 @@ export function BranchesTable({ data }: DataTableProps) {
                 </Table>
             </div>
             <DataTablePagination table={table} />
+            {table.getFilteredSelectedRowModel().rows.length > 0 && <DataTableBulkActions table={table} />}
         </div>
     )
 }
