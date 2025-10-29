@@ -15,6 +15,7 @@ import { cn } from '@/lib/utils'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
+import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { type Branch } from '../data/schema'
 import { branchesColumns as columns } from './branches-columns'
 import { useBranches } from './branches-provider'
@@ -110,7 +111,9 @@ export function BranchesTable({ data, paginationInfo, loading, error }: DataTabl
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    جاري التحميل...
+                                    <div className="flex items-center justify-center">
+                                        <Spinner className="text-primary" size={32} />
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ) : error ? (

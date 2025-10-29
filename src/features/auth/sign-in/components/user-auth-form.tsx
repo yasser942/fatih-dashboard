@@ -3,11 +3,12 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useMutation } from '@apollo/client/react'
-import { Loader2, LogIn } from 'lucide-react'
+import { LogIn } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import {
   Form,
   FormControl,
@@ -150,7 +151,7 @@ export function UserAuthForm({
           )}
         />
         <Button className='mt-2' disabled={loading}>
-          {loading ? <Loader2 className='animate-spin' /> : <LogIn />}
+          {loading ? <Spinner className="text-current" size={20} /> : <LogIn />}
           تسجيل الدخول
         </Button>
       </form>

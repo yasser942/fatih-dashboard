@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar, DataTableBulkActions } from '@/components/data-table'
+import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { type Order } from '../data/schema'
 import { ordersColumns as columns } from './orders-columns'
 import { useOrders } from './orders-provider'
@@ -110,7 +111,9 @@ export function OrdersTable({ data, paginationInfo, loading, error }: DataTableP
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                                    جاري التحميل...
+                                    <div className="flex items-center justify-center">
+                                        <Spinner className="text-primary" size={32} />
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ) : error ? (

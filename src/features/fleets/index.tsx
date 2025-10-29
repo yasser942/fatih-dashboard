@@ -6,6 +6,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { ConfigDrawer } from '@/components/config-drawer'
+import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { FleetsProvider } from './components/fleets-provider'
 import { FleetsDialogs } from './components/fleets-dialogs'
 import { FleetsPrimaryButtons } from './components/fleets-primary-buttons'
@@ -41,9 +42,9 @@ export function Fleets() {
     if (loading) {
         return (
             <div className='flex h-screen items-center justify-center'>
-                <div className='text-center'>
-                    <div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent'></div>
-                    <p className='mt-2 text-sm text-muted-foreground'>جاري تحميل المركبات...</p>
+                <div className='flex flex-col items-center gap-3'>
+                    <Spinner className="text-primary" size={48} />
+                    <p className='text-sm text-muted-foreground'>جاري تحميل المركبات...</p>
                 </div>
             </div>
         )

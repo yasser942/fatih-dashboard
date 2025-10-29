@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 import { useTableUrlState } from '@/hooks/use-table-url-state'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar, DataTableBulkActions } from '@/components/data-table'
+import { Spinner } from '@/components/ui/shadcn-io/spinner'
 import { type Customer } from '../data/schema'
 import { customersColumns as columns } from './customers-columns'
 import { useCustomers } from './customers-provider'
@@ -103,8 +104,7 @@ export function CustomersTable({ data, paginationInfo, loading, error }: DataTab
                             <TableRow>
                                 <TableCell colSpan={columns.length} className="h-24 text-center">
                                     <div className="flex items-center justify-center">
-                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                                        <span className="ml-2">جاري التحميل...</span>
+                                        <Spinner className="text-primary" size={32} />
                                     </div>
                                 </TableCell>
                             </TableRow>
