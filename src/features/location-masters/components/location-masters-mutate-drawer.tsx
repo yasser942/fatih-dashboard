@@ -11,17 +11,33 @@ import {
     SheetHeader,
     SheetTitle,
 } from '@/components/ui/sheet'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+import {
+    ChevronDown,
+    ChevronUp,
+    Globe,
+    Building2,
+    MapPin,
+    Home,
+    Trees,
+    Users,
+    Info,
+    Navigation,
+    Check,
+    X
+} from 'lucide-react'
 import { useState } from 'react'
 import { useLocationMasters } from './location-masters-provider'
 import { CREATE_LOCATION_MASTER_MUTATION, UPDATE_LOCATION_MASTER_MUTATION } from '../graphql/mutations'
 import { LOCATION_MASTERS_QUERY } from '../graphql/queries'
 import { createLocationMasterSchema, updateLocationMasterSchema, type CreateLocationMaster, type UpdateLocationMaster } from '../data/schema'
+import { cn } from '@/lib/utils'
 
 export function LocationMastersMutateDrawer() {
     const { open, setOpen, currentRow, setCurrentRow, refetch } = useLocationMasters()
@@ -120,68 +136,35 @@ export function LocationMastersMutateDrawer() {
 
     const [createLocationMaster, { loading: createLoading }] = useMutation(CREATE_LOCATION_MASTER_MUTATION, {
         refetchQueries: [LOCATION_MASTERS_QUERY],
-        onCompleted: (data) => {
-            console.log('✅ Create mutation completed successfully:', data)
+        onCompleted: () => {
             form.reset()
             setOpen(null)
             setCurrentRow(null)
             refetch?.()
-        },
-        onError: (error) => {
-            console.error('❌ Create mutation failed:', error)
-            console.error('Error message:', error.message)
-            console.error('Network error:', error.networkError)
-            console.error('GraphQL errors:', error.graphQLErrors)
         },
     })
 
     const [updateLocationMaster, { loading: updateLoading }] = useMutation(UPDATE_LOCATION_MASTER_MUTATION, {
         refetchQueries: [LOCATION_MASTERS_QUERY],
-        onCompleted: (data) => {
-            console.log('✅ Update mutation completed successfully:', data)
+        onCompleted: () => {
             form.reset()
             setOpen(null)
             setCurrentRow(null)
             refetch?.()
         },
-        onError: (error) => {
-            console.error('❌ Update mutation failed:', error)
-            console.error('Error message:', error.message)
-            console.error('Network error:', error.networkError)
-            console.error('GraphQL errors:', error.graphQLErrors)
-        },
     })
 
     const onSubmit = (data: CreateLocationMaster | UpdateLocationMaster) => {
-        console.log('=== FORM SUBMISSION DEBUG ===')
-        console.log('isUpdate:', isUpdate)
-        console.log('currentRow:', currentRow)
-        console.log('currentRow.id:', currentRow?.id)
-        console.log('Form data:', data)
-        console.log('location_type value:', data.location_type)
-        console.log('is_active value:', data.is_active)
-        console.log('Location_Pcode value:', data.Location_Pcode)
-        console.log('district_ar value:', data.district_ar)
-        console.log('village_town_ar value:', data.village_town_ar)
-        console.log('================================')
-
         if (isUpdate && currentRow) {
-            console.log('Calling updateLocationMaster with:', {
-                id: currentRow.id.toString(),
-                input: data as UpdateLocationMaster,
-            })
-
             // Clean up the data - remove empty strings, null values, and convert to undefined
             const cleanedData = Object.fromEntries(
                 Object.entries(data)
-                    .filter(([key, value]) => {
+                    .filter(([_key, value]) => {
                         // Keep only non-empty values
                         return value !== '' && value !== null && value !== undefined
                     })
                     .map(([key, value]) => [key, value])
             )
-
-            console.log('Cleaned data:', cleanedData)
 
             updateLocationMaster({
                 variables: {
@@ -190,9 +173,6 @@ export function LocationMastersMutateDrawer() {
                 },
             })
         } else {
-            console.log('Calling createLocationMaster with:', {
-                input: data as CreateLocationMaster,
-            })
             createLocationMaster({
                 variables: {
                     input: data as CreateLocationMaster,
@@ -207,35 +187,115 @@ export function LocationMastersMutateDrawer() {
         form.reset()
     }
 
+    // Helper component for collapsible section header
+    const SectionHeader = ({
+        icon: Icon,
+        title,
+        isOpen,
+        isRequired = false,
+        badge
+    }: {
+        icon: React.ElementType
+        title: string
+        isOpen: boolean
+        isRequired?: boolean
+        badge?: string
+    }) => (
+        <div className="flex w-full items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+                <div className={cn(
+                    "rounded-lg p-2 transition-colors",
+                    isOpen ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                )}>
+                    <Icon className="h-4 w-4" />
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="font-semibold text-base">{title}</span>
+                    {isRequired && !isUpdate && (
+                        <Badge variant="destructive" className="h-5 text-xs">مطلوب</Badge>
+                    )}
+                    {badge && (
+                        <Badge variant="outline" className="h-5 text-xs">{badge}</Badge>
+                    )}
+                </div>
+            </div>
+            {isOpen ? <ChevronUp className="h-5 w-5 text-muted-foreground" /> : <ChevronDown className="h-5 w-5 text-muted-foreground" />}
+        </div>
+    )
+
     return (
         <Sheet open={open === 'create' || open === 'update'} onOpenChange={handleClose}>
-            <SheetContent className="overflow-y-auto">
-                <SheetHeader>
-                    <SheetTitle>
-                        {isUpdate ? 'تعديل الموقع' : 'إضافة موقع جديد'}
-                    </SheetTitle>
-                    <SheetDescription>
-                        {isUpdate ? 'قم بتعديل بيانات الموقع' : 'أدخل بيانات الموقع الجديد'}
-                    </SheetDescription>
+            <SheetContent className="overflow-y-auto sm:max-w-2xl">
+                <SheetHeader className="space-y-4 pb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="rounded-lg bg-primary/10 p-2">
+                            <MapPin className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                            <SheetTitle className="text-2xl">
+                                {isUpdate ? 'تعديل الموقع' : 'إضافة موقع جديد'}
+                            </SheetTitle>
+                            <SheetDescription className="text-base mt-1">
+                                {isUpdate ? 'قم بتعديل بيانات الموقع' : 'أدخل بيانات الموقع الجديد'}
+                            </SheetDescription>
+                        </div>
+                    </div>
+                    {isUpdate && currentRow && (
+                        <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
+                            <div className="flex items-center gap-2">
+                                <Info className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-sm font-medium">معلومات الموقع الحالي</span>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground">الكود:</span>
+                                    <span className="font-mono font-medium">{currentRow.Location_Pcode}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-muted-foreground">النوع:</span>
+                                    <Badge variant="outline" className="h-5">
+                                        {currentRow.location_type === 'Community' ? 'مجتمع' :
+                                            currentRow.location_type === 'Camp' ? 'مخيم' : 'حي'}
+                                    </Badge>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </SheetHeader>
+                <Separator className="my-4" />
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 px-1">
                         {/* Country Section */}
                         <Collapsible open={isCountryOpen} onOpenChange={setIsCountryOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">بيانات البلد</span>
-                                {isCountryOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isCountryOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={Globe}
+                                    title="بيانات البلد"
+                                    isOpen={isCountryOpen}
+                                    isRequired={true}
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="country_en"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم البلد بالإنجليزية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم البلد بالإنجليزية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: Egypt" {...field} />
+                                                    <Input
+                                                        placeholder="مثال: Iraq"
+                                                        {...field}
+                                                        className="text-left"
+                                                        dir="ltr"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -246,9 +306,12 @@ export function LocationMastersMutateDrawer() {
                                         name="country_ar"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم البلد بالعربية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم البلد بالعربية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: مصر" {...field} />
+                                                    <Input placeholder="مثال: العراق" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -260,10 +323,21 @@ export function LocationMastersMutateDrawer() {
                                     name="country0Pcode"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>كود البلد</FormLabel>
+                                            <FormLabel className="flex items-center gap-2">
+                                                كود البلد
+                                                {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="مثال: EG" {...field} />
+                                                <Input
+                                                    placeholder="مثال: IQ"
+                                                    {...field}
+                                                    maxLength={10}
+                                                    className="font-mono"
+                                                />
                                             </FormControl>
+                                            <FormDescription className="text-xs">
+                                                كود دولي معياري (حتى 10 أحرف)
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -273,20 +347,35 @@ export function LocationMastersMutateDrawer() {
 
                         {/* Governorate Section */}
                         <Collapsible open={isGovernorateOpen} onOpenChange={setIsGovernorateOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">بيانات المحافظة</span>
-                                {isGovernorateOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isGovernorateOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={Building2}
+                                    title="بيانات المحافظة"
+                                    isOpen={isGovernorateOpen}
+                                    isRequired={true}
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="governorate_en"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم المحافظة بالإنجليزية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم المحافظة بالإنجليزية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: Cairo" {...field} />
+                                                    <Input
+                                                        placeholder="مثال: Baghdad"
+                                                        {...field}
+                                                        className="text-left"
+                                                        dir="ltr"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -297,9 +386,12 @@ export function LocationMastersMutateDrawer() {
                                         name="governorate_ar"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم المحافظة بالعربية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم المحافظة بالعربية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: القاهرة" {...field} />
+                                                    <Input placeholder="مثال: بغداد" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -311,10 +403,21 @@ export function LocationMastersMutateDrawer() {
                                     name="governorate1Pcode"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>كود المحافظة</FormLabel>
+                                            <FormLabel className="flex items-center gap-2">
+                                                كود المحافظة
+                                                {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="مثال: CAI" {...field} />
+                                                <Input
+                                                    placeholder="مثال: BGD"
+                                                    {...field}
+                                                    maxLength={10}
+                                                    className="font-mono"
+                                                />
                                             </FormControl>
+                                            <FormDescription className="text-xs">
+                                                كود المحافظة (حتى 10 أحرف)
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -324,20 +427,35 @@ export function LocationMastersMutateDrawer() {
 
                         {/* District Section */}
                         <Collapsible open={isDistrictOpen} onOpenChange={setIsDistrictOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">بيانات المنطقة</span>
-                                {isDistrictOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isDistrictOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={MapPin}
+                                    title="بيانات المنطقة"
+                                    isOpen={isDistrictOpen}
+                                    isRequired={true}
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="district_en"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم المنطقة بالإنجليزية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم المنطقة بالإنجليزية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: Downtown" {...field} />
+                                                    <Input
+                                                        placeholder="مثال: Karkh"
+                                                        {...field}
+                                                        className="text-left"
+                                                        dir="ltr"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -348,9 +466,12 @@ export function LocationMastersMutateDrawer() {
                                         name="district_ar"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم المنطقة بالعربية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم المنطقة بالعربية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: وسط البلد" {...field} />
+                                                    <Input placeholder="مثال: الكرخ" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -362,10 +483,21 @@ export function LocationMastersMutateDrawer() {
                                     name="districtPcode"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>كود المنطقة</FormLabel>
+                                            <FormLabel className="flex items-center gap-2">
+                                                كود المنطقة
+                                                {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="مثال: DOW" {...field} />
+                                                <Input
+                                                    placeholder="مثال: KRK"
+                                                    {...field}
+                                                    maxLength={10}
+                                                    className="font-mono"
+                                                />
                                             </FormControl>
+                                            <FormDescription className="text-xs">
+                                                كود المنطقة (حتى 10 أحرف)
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -375,20 +507,35 @@ export function LocationMastersMutateDrawer() {
 
                         {/* Subdistrict Section */}
                         <Collapsible open={isSubdistrictOpen} onOpenChange={setIsSubdistrictOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">بيانات الناحية</span>
-                                {isSubdistrictOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isSubdistrictOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={Home}
+                                    title="بيانات الناحية"
+                                    isOpen={isSubdistrictOpen}
+                                    isRequired={true}
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="subdistrict_en"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم الناحية بالإنجليزية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم الناحية بالإنجليزية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: Tahrir" {...field} />
+                                                    <Input
+                                                        placeholder="مثال: Al-Rashid"
+                                                        {...field}
+                                                        className="text-left"
+                                                        dir="ltr"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -399,9 +546,12 @@ export function LocationMastersMutateDrawer() {
                                         name="subdistrict_ar"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم الناحية بالعربية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم الناحية بالعربية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: التحرير" {...field} />
+                                                    <Input placeholder="مثال: الرشيد" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -413,10 +563,21 @@ export function LocationMastersMutateDrawer() {
                                     name="subdistrictPcode"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>كود الناحية</FormLabel>
+                                            <FormLabel className="flex items-center gap-2">
+                                                كود الناحية
+                                                {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="مثال: TAH" {...field} />
+                                                <Input
+                                                    placeholder="مثال: RSH"
+                                                    {...field}
+                                                    maxLength={10}
+                                                    className="font-mono"
+                                                />
                                             </FormControl>
+                                            <FormDescription className="text-xs">
+                                                كود الناحية (حتى 10 أحرف)
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -426,20 +587,35 @@ export function LocationMastersMutateDrawer() {
 
                         {/* Village/Town Section */}
                         <Collapsible open={isVillageOpen} onOpenChange={setIsVillageOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">بيانات القرية/المدينة</span>
-                                {isVillageOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isVillageOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={Trees}
+                                    title="بيانات القرية/المدينة"
+                                    isOpen={isVillageOpen}
+                                    isRequired={true}
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="village_town_en"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم القرية/المدينة بالإنجليزية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم القرية/المدينة بالإنجليزية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: Tahrir Square" {...field} />
+                                                    <Input
+                                                        placeholder="مثال: Al-Karada"
+                                                        {...field}
+                                                        className="text-left"
+                                                        dir="ltr"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -450,9 +626,12 @@ export function LocationMastersMutateDrawer() {
                                         name="village_town_ar"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>اسم القرية/المدينة بالعربية</FormLabel>
+                                                <FormLabel className="flex items-center gap-2">
+                                                    اسم القرية/المدينة بالعربية
+                                                    {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: ميدان التحرير" {...field} />
+                                                    <Input placeholder="مثال: الكرادة" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -464,10 +643,21 @@ export function LocationMastersMutateDrawer() {
                                     name="village_townPcode"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>كود القرية/المدينة</FormLabel>
+                                            <FormLabel className="flex items-center gap-2">
+                                                كود القرية/المدينة
+                                                {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="مثال: TAH01" {...field} />
+                                                <Input
+                                                    placeholder="مثال: KRD01"
+                                                    {...field}
+                                                    maxLength={10}
+                                                    className="font-mono"
+                                                />
                                             </FormControl>
+                                            <FormDescription className="text-xs">
+                                                كود القرية/المدينة (حتى 10 أحرف)
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -477,11 +667,18 @@ export function LocationMastersMutateDrawer() {
 
                         {/* Neighborhood/Community Section */}
                         <Collapsible open={isNeighborhoodOpen} onOpenChange={setIsNeighborhoodOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">بيانات الحي/المجتمع</span>
-                                {isNeighborhoodOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isNeighborhoodOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={Users}
+                                    title="بيانات الحي/المجتمع"
+                                    isOpen={isNeighborhoodOpen}
+                                    badge="اختياري"
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
@@ -490,7 +687,12 @@ export function LocationMastersMutateDrawer() {
                                             <FormItem>
                                                 <FormLabel>اسم الحي/المجتمع بالإنجليزية</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: Downtown Community" {...field} />
+                                                    <Input
+                                                        placeholder="مثال: Al-Mansour Community"
+                                                        {...field}
+                                                        className="text-left"
+                                                        dir="ltr"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -503,7 +705,7 @@ export function LocationMastersMutateDrawer() {
                                             <FormItem>
                                                 <FormLabel>اسم الحي/المجتمع بالعربية</FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="مثال: مجتمع وسط البلد" {...field} />
+                                                    <Input placeholder="مثال: مجتمع المنصور" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -515,20 +717,38 @@ export function LocationMastersMutateDrawer() {
 
                         {/* Location Details Section */}
                         <Collapsible open={isLocationDetailsOpen} onOpenChange={setIsLocationDetailsOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">تفاصيل الموقع</span>
-                                {isLocationDetailsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isLocationDetailsOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={Info}
+                                    title="تفاصيل الموقع"
+                                    isOpen={isLocationDetailsOpen}
+                                    isRequired={true}
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <FormField
                                     control={form.control}
                                     name="Location_Pcode"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>كود الموقع</FormLabel>
+                                            <FormLabel className="flex items-center gap-2">
+                                                كود الموقع
+                                                {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                            </FormLabel>
                                             <FormControl>
-                                                <Input placeholder="مثال: LOC001" {...field} />
+                                                <Input
+                                                    placeholder="مثال: LOC001"
+                                                    {...field}
+                                                    maxLength={20}
+                                                    className="font-mono"
+                                                />
                                             </FormControl>
+                                            <FormDescription className="text-xs">
+                                                كود فريد للموقع (حتى 20 حرف)
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -538,7 +758,10 @@ export function LocationMastersMutateDrawer() {
                                     name="location_type"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>نوع الموقع</FormLabel>
+                                            <FormLabel className="flex items-center gap-2">
+                                                نوع الموقع
+                                                {!isUpdate && <span className="text-destructive text-sm">*</span>}
+                                            </FormLabel>
                                             <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl>
                                                     <SelectTrigger>
@@ -546,9 +769,24 @@ export function LocationMastersMutateDrawer() {
                                                     </SelectTrigger>
                                                 </FormControl>
                                                 <SelectContent>
-                                                    <SelectItem value="Community">مجتمع</SelectItem>
-                                                    <SelectItem value="Camp">مخيم</SelectItem>
-                                                    <SelectItem value="Neighbourhood">حي</SelectItem>
+                                                    <SelectItem value="Community">
+                                                        <div className="flex items-center gap-2">
+                                                            <Users className="h-4 w-4" />
+                                                            <span>مجتمع</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                    <SelectItem value="Camp">
+                                                        <div className="flex items-center gap-2">
+                                                            <Home className="h-4 w-4" />
+                                                            <span>مخيم</span>
+                                                        </div>
+                                                    </SelectItem>
+                                                    <SelectItem value="Neighbourhood">
+                                                        <div className="flex items-center gap-2">
+                                                            <Building2 className="h-4 w-4" />
+                                                            <span>حي</span>
+                                                        </div>
+                                                    </SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
@@ -560,28 +798,39 @@ export function LocationMastersMutateDrawer() {
 
                         {/* Coordinates Section */}
                         <Collapsible open={isCoordinatesOpen} onOpenChange={setIsCoordinatesOpen}>
-                            <CollapsibleTrigger className="flex w-full items-center justify-between rounded-lg border p-4 text-left">
-                                <span className="font-medium">الإحداثيات</span>
-                                {isCoordinatesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                            <CollapsibleTrigger className={cn(
+                                "flex w-full items-center justify-between rounded-lg border p-4 text-left transition-all hover:bg-accent/50",
+                                isCoordinatesOpen && "border-primary/50 bg-primary/5"
+                            )}>
+                                <SectionHeader
+                                    icon={Navigation}
+                                    title="الإحداثيات الجغرافية"
+                                    isOpen={isCoordinatesOpen}
+                                    badge="اختياري"
+                                />
                             </CollapsibleTrigger>
-                            <CollapsibleContent className="space-y-4 p-4">
+                            <CollapsibleContent className="space-y-4 pt-4 px-2">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <FormField
                                         control={form.control}
                                         name="Latitude_y"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>خط العرض</FormLabel>
+                                                <FormLabel>خط العرض (Latitude)</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"
                                                         step="any"
-                                                        placeholder="مثال: 30.0444"
+                                                        placeholder="مثال: 33.3152"
                                                         {...field}
-                                                        value={field.value || ''}
+                                                        value={field.value ?? ''}
                                                         onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                                        className="font-mono"
                                                     />
                                                 </FormControl>
+                                                <FormDescription className="text-xs">
+                                                    من -90 إلى 90
+                                                </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -591,17 +840,21 @@ export function LocationMastersMutateDrawer() {
                                         name="Longitude_x"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>خط الطول</FormLabel>
+                                                <FormLabel>خط الطول (Longitude)</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"
                                                         step="any"
-                                                        placeholder="مثال: 31.2357"
+                                                        placeholder="مثال: 44.3661"
                                                         {...field}
-                                                        value={field.value || ''}
+                                                        value={field.value ?? ''}
                                                         onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : undefined)}
+                                                        className="font-mono"
                                                     />
                                                 </FormControl>
+                                                <FormDescription className="text-xs">
+                                                    من -180 إلى 180
+                                                </FormDescription>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
@@ -610,16 +863,25 @@ export function LocationMastersMutateDrawer() {
                             </CollapsibleContent>
                         </Collapsible>
 
+                        <Separator className="my-6" />
+
                         {/* Status */}
                         <FormField
                             control={form.control}
                             name="is_active"
                             render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                    <div className="space-y-0.5">
-                                        <FormLabel className="text-base">الحالة</FormLabel>
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 bg-muted/30">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-2">
+                                            {field.value ? (
+                                                <Check className="h-4 w-4 text-green-600" />
+                                            ) : (
+                                                <X className="h-4 w-4 text-muted-foreground" />
+                                            )}
+                                            <FormLabel className="text-base font-semibold m-0">حالة الموقع</FormLabel>
+                                        </div>
                                         <div className="text-sm text-muted-foreground">
-                                            تفعيل أو إلغاء تفعيل هذا الموقع
+                                            {field.value ? 'الموقع نشط ومتاح للاستخدام' : 'الموقع غير نشط'}
                                         </div>
                                     </div>
                                     <FormControl>
@@ -632,9 +894,42 @@ export function LocationMastersMutateDrawer() {
                             )}
                         />
 
-                        <SheetFooter>
-                            <Button type="submit" disabled={createLoading || updateLoading}>
-                                {createLoading || updateLoading ? 'جاري الحفظ...' : (isUpdate ? 'تحديث' : 'إنشاء')}
+                        <Separator className="my-6" />
+
+                        <SheetFooter className="gap-2 sm:gap-0">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={handleClose}
+                                disabled={createLoading || updateLoading}
+                            >
+                                إلغاء
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={createLoading || updateLoading}
+                                className="gap-2"
+                            >
+                                {createLoading || updateLoading ? (
+                                    <>
+                                        <span className="animate-spin">⏳</span>
+                                        <span>جاري الحفظ...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        {isUpdate ? (
+                                            <>
+                                                <Check className="h-4 w-4" />
+                                                <span>تحديث الموقع</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <MapPin className="h-4 w-4" />
+                                                <span>إنشاء موقع جديد</span>
+                                            </>
+                                        )}
+                                    </>
+                                )}
                             </Button>
                         </SheetFooter>
                     </form>
