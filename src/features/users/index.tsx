@@ -66,10 +66,14 @@ function UsersPageContent() {
       </Header>
 
       <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
-        <div className='flex flex-wrap items-end justify-between gap-2'>
-          <div>
-            <h2 className='text-2xl font-bold tracking-tight'>إدارة المستخدمين</h2>
-            <p className='text-muted-foreground'>إدارة المستخدمين في النظام</p>
+        <div className='flex flex-wrap items-end justify-between gap-4'>
+          <div className="space-y-1">
+            <h2 className='text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text'>
+              إدارة المستخدمين
+            </h2>
+            <p className='text-sm text-muted-foreground'>
+              إدارة حسابات المستخدمين والعملاء والموظفين في النظام
+            </p>
           </div>
           <UsersPrimaryButtons />
         </div>

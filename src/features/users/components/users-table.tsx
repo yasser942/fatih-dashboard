@@ -84,14 +84,14 @@ export function UsersTable({ data, paginationInfo, loading, error }: DataTablePr
       <DataTableToolbar table={table}>
         {table.getFilteredSelectedRowModel().rows.length > 0 && <UsersBulkActions table={table} />}
       </DataTableToolbar>
-      <div className='rounded-md border'>
+      <div className='rounded-lg border shadow-sm overflow-hidden'>
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="hover:bg-muted/50">
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
+                    <TableHead key={header.id} colSpan={header.colSpan} className="font-semibold">
                       {header.isPlaceholder
                         ? null
                         : flexRender(header.column.columnDef.header, header.getContext())}
@@ -104,16 +104,21 @@ export function UsersTable({ data, paginationInfo, loading, error }: DataTablePr
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  <div className="flex items-center justify-center">
-                    <Spinner className="text-primary" size={32} />
+                <TableCell colSpan={columns.length} className='h-32 text-center'>
+                  <div className="flex flex-col items-center justify-center gap-3">
+                    <Spinner className="text-primary" size={40} />
+                    <p className="text-sm text-muted-foreground">جاري تحميل البيانات...</p>
                   </div>
                 </TableCell>
               </TableRow>
             ) : error ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center text-red-500'>
-                  حدث خطأ أثناء تحميل البيانات
+                <TableCell colSpan={columns.length} className='h-32 text-center'>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="text-4xl">⚠️</div>
+                    <p className="text-red-600 font-medium">حدث خطأ أثناء تحميل البيانات</p>
+                    <p className="text-sm text-muted-foreground">يرجى المحاولة مرة أخرى</p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
@@ -121,7 +126,10 @@ export function UsersTable({ data, paginationInfo, loading, error }: DataTablePr
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={cn(row.getIsSelected() && 'bg-muted/50')}
+                  className={cn(
+                    'transition-colors hover:bg-muted/30',
+                    row.getIsSelected() && 'bg-primary/5 hover:bg-primary/10'
+                  )}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -132,8 +140,12 @@ export function UsersTable({ data, paginationInfo, loading, error }: DataTablePr
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center'>
-                  لا توجد نتائج.
+                <TableCell colSpan={columns.length} className='h-32 text-center'>
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="text-4xl">📭</div>
+                    <p className="font-medium text-muted-foreground">لا توجد نتائج</p>
+                    <p className="text-sm text-muted-foreground">ابدأ بإضافة مستخدم جديد</p>
+                  </div>
                 </TableCell>
               </TableRow>
             )}

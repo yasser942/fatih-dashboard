@@ -70,8 +70,19 @@ export const sidebarData: SidebarData = {
         },
         {
           title: 'المهام',
-          url: '/tasks',
           icon: ListTodo,
+          items: [
+            {
+              title: 'المهام',
+              url: '/tasks',
+              icon: ListTodo,
+            },
+            {
+              title: 'أنواع المهام',
+              url: '/task-types',
+              icon: Settings2,
+            },
+          ],
         },
         {
           title: 'المراسلات',

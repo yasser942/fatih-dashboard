@@ -2,11 +2,13 @@ import { useQuery } from '@apollo/client/react'
 import { gql } from '@apollo/client/core'
 
 const USERS_SEARCH_QUERY = gql`
-  query UsersSearch($name: String) {
-    users(name: $name) {
-      id
-      name
-      email
+  query UsersSearch($search: String) {
+    users(search: $search, first: 10) {
+      data {
+        id
+        name
+        email
+      }
     }
   }
 `
@@ -59,16 +61,16 @@ export function useOrderFormData() {
 }
 
 export function useUsersSearch(searchTerm: string = '') {
-  const { data: usersData, loading: usersLoading, error: usersError } = useQuery(USERS_SEARCH_QUERY, {
+  const { data: usersDataRaw, loading: usersLoading, error: usersError } = useQuery(USERS_SEARCH_QUERY, {
     variables: {
-      name: searchTerm, // Always pass the search term as string
+      search: searchTerm,
     },
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: false,
     errorPolicy: 'all',
-    // Always run the query to get initial users or search results
   })
-
+  // Backend returns { users: { data: [...] } }
+  const usersData = usersDataRaw && usersDataRaw.users ? { users: usersDataRaw.users.data } : { users: [] };
   return {
     usersData,
     usersLoading,

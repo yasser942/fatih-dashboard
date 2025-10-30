@@ -5,13 +5,15 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Check, ChevronsUpDown, User, Building, Package } from 'lucide-react'
+import { Check, ChevronsUpDown, User, Building, Package, QrCode, TruckIcon, Users, DollarSign, AlertCircle, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Separator } from '@/components/ui/separator'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useOrders } from './orders-provider'
 import {
     orderStatusValues,
@@ -83,6 +85,8 @@ export function OrdersMutateDrawer() {
                 cod_currency_id: currentRow.cod_currency_id || 0,
             }
             form.reset(formData)
+            setSelectedSender(currentRow.sender ?? null)
+            setSelectedReceiver(currentRow.receiver ?? null)
         } else if (open === 'create') {
             form.reset({
                 qr_code: '',
@@ -98,6 +102,8 @@ export function OrdersMutateDrawer() {
                 cash_on_delivery: 0,
                 cod_currency_id: 0,
             })
+            setSelectedSender(null)
+            setSelectedReceiver(null)
             form.clearErrors()
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -334,79 +340,118 @@ export function OrdersMutateDrawer() {
                     <SheetDescription>{isUpdate ? 'قم بتعديل بيانات الشحنة' : 'أدخل بيانات الشحنة الجديدة'}</SheetDescription>
                 </SheetHeader>
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-6">
-                        <FormField
-                            control={form.control}
-                            name="qr_code"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>رمز QR</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="أدخل رمز QR" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        <FormField
-                            control={form.control}
-                            name="status"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>الحالة</FormLabel>
-                                    <FormControl>
-                                        <Select value={field.value} onValueChange={field.onChange}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="اختر الحالة" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {orderStatusValues.map((status) => (
-                                                    <SelectItem key={status} value={status}>
-                                                        {getStatusLabel(status)}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {watchedStatus === 'canceled' && (
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-6">
+                        {/* Basic Information Section */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 pb-2">
+                                <QrCode className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">معلومات الشحنة الأساسية</h3>
+                            </div>
+                            
                             <FormField
                                 control={form.control}
-                                name="cancellation_reason"
+                                name="qr_code"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>سبب الإلغاء</FormLabel>
+                                        <FormLabel className="flex items-center gap-2">
+                                            رمز QR
+                                            <span className="text-red-500">*</span>
+                                        </FormLabel>
+                                        <FormControl>
+                                            <Input 
+                                                placeholder="أدخل رمز QR الفريد للشحنة" 
+                                                {...field}
+                                                className="font-mono"
+                                            />
+                                        </FormControl>
+                                        <FormDescription className="text-xs">
+                                            رمز تعريف فريد لتتبع الشحنة
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="status"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel className="flex items-center gap-2">
+                                            حالة الشحنة
+                                            <span className="text-red-500">*</span>
+                                        </FormLabel>
                                         <FormControl>
                                             <Select value={field.value} onValueChange={field.onChange}>
                                                 <SelectTrigger>
-                                                    <SelectValue placeholder="اختر سبب الإلغاء" />
+                                                    <SelectValue placeholder="اختر حالة الشحنة" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {cancellationReasonValues.map((reason) => (
-                                                        <SelectItem key={reason} value={reason}>
-                                                            {getCancellationReasonLabel(reason)}
+                                                    {orderStatusValues.map((status) => (
+                                                        <SelectItem key={status} value={status}>
+                                                            {getStatusLabel(status)}
                                                         </SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                         </FormControl>
+                                        <FormDescription className="text-xs">
+                                            الحالة الحالية للشحنة في دورة النقل
+                                        </FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                        )}
+
+                            {watchedStatus === 'canceled' && (
+                                <FormField
+                                    control={form.control}
+                                    name="cancellation_reason"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="flex items-center gap-2">
+                                                سبب الإلغاء
+                                                <span className="text-red-500">*</span>
+                                            </FormLabel>
+                                            <FormControl>
+                                                <Select value={field.value} onValueChange={field.onChange}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="اختر سبب الإلغاء" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {cancellationReasonValues.map((reason) => (
+                                                            <SelectItem key={reason} value={reason}>
+                                                                {getCancellationReasonLabel(reason)}
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+                        </div>
+
+                        <Separator className="my-6" />
+
+                        {/* Route Information Section */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 pb-2">
+                                <TruckIcon className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">معلومات المسار</h3>
+                            </div>
 
                         <FormField
                             control={form.control}
                             name="branch_source_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>فرع المصدر</FormLabel>
+                                    <FormLabel className="flex items-center gap-2">
+                                        فرع المصدر
+                                        <span className="text-red-500">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Popover open={branchSourceOpen} onOpenChange={setBranchSourceOpen}>
                                             <PopoverTrigger asChild>
@@ -415,8 +460,14 @@ export function OrdersMutateDrawer() {
                                                     role="combobox"
                                                     aria-expanded={branchSourceOpen}
                                                     className="w-full justify-between"
+                                                    disabled={branchesLoading}
                                                 >
-                                                    {field.value && field.value > 0
+                                                    {branchesLoading ? (
+                                                        <>
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                            جاري التحميل...
+                                                        </>
+                                                    ) : field.value && field.value > 0
                                                         ? (() => {
                                                             const branch = (branchesData as any)?.branches?.find((branch: any) => Number(branch.id) === Number(field.value))
                                                             return branch ? branch.name : 'اختر فرع المصدر...'
@@ -470,6 +521,9 @@ export function OrdersMutateDrawer() {
                                             </PopoverContent>
                                         </Popover>
                                     </FormControl>
+                                    <FormDescription className="text-xs">
+                                        الفرع الذي ستبدأ منه الشحنة
+                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -484,7 +538,10 @@ export function OrdersMutateDrawer() {
 
                                 return (
                                     <FormItem>
-                                        <FormLabel>فرع الوجهة</FormLabel>
+                                        <FormLabel className="flex items-center gap-2">
+                                            فرع الوجهة
+                                            <span className="text-red-500">*</span>
+                                        </FormLabel>
                                         <FormControl>
                                             <Popover open={branchTargetOpen && !isTargetDisabled} onOpenChange={(open) => {
                                                 if (!isTargetDisabled) {
@@ -497,7 +554,7 @@ export function OrdersMutateDrawer() {
                                                         role="combobox"
                                                         aria-expanded={branchTargetOpen}
                                                         className="w-full justify-between"
-                                                        disabled={isTargetDisabled}
+                                                        disabled={isTargetDisabled || branchesLoading}
                                                     >
                                                         {field.value && field.value > 0
                                                             ? (() => {
@@ -549,22 +606,38 @@ export function OrdersMutateDrawer() {
                                                                     ))}
                                                             </CommandGroup>
                                                         </CommandList>
-                                                    </Command>
-                                                </PopoverContent>
-                                            </Popover>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </FormControl>
+                                    <FormDescription className="text-xs">
+                                        {isTargetDisabled ? 'اختر فرع المصدر أولاً' : 'الفرع الذي ستصل إليه الشحنة'}
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
                                 )
                             }}
                         />
+                        </div>
+
+                        <Separator className="my-6" />
+
+                        {/* Participants Section */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 pb-2">
+                                <Users className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">معلومات المشاركين</h3>
+                            </div>
 
                         <FormField
                             control={form.control}
                             name="sender_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>المرسل</FormLabel>
+                                    <FormLabel className="flex items-center gap-2">
+                                        المرسل
+                                        <span className="text-red-500">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Popover open={senderOpen} onOpenChange={setSenderOpen}>
                                             <PopoverTrigger asChild>
@@ -633,6 +706,9 @@ export function OrdersMutateDrawer() {
                                             </PopoverContent>
                                         </Popover>
                                     </FormControl>
+                                    <FormDescription className="text-xs">
+                                        الشخص الذي سيرسل الشحنة
+                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -647,7 +723,10 @@ export function OrdersMutateDrawer() {
 
                                 return (
                                     <FormItem>
-                                        <FormLabel>المستقبل</FormLabel>
+                                        <FormLabel className="flex items-center gap-2">
+                                            المستقبل
+                                            <span className="text-red-500">*</span>
+                                        </FormLabel>
                                         <FormControl>
                                             <Popover open={receiverOpen && !isReceiverDisabled} onOpenChange={(open) => {
                                                 if (!isReceiverDisabled) {
@@ -717,22 +796,38 @@ export function OrdersMutateDrawer() {
                                                                     ))}
                                                             </CommandGroup>
                                                         </CommandList>
-                                                    </Command>
-                                                </PopoverContent>
-                                            </Popover>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
+                                    </FormControl>
+                                    <FormDescription className="text-xs">
+                                        {isReceiverDisabled ? 'اختر المرسل أولاً' : 'الشخص الذي سيستلم الشحنة'}
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
                                 )
                             }}
                         />
+                        </div>
+
+                        <Separator className="my-6" />
+
+                        {/* Fees Section */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 pb-2">
+                                <DollarSign className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">معلومات الرسوم والدفع</h3>
+                            </div>
 
                         <FormField
                             control={form.control}
                             name="fees_type"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>نوع الرسوم</FormLabel>
+                                    <FormLabel className="flex items-center gap-2">
+                                        نوع الرسوم
+                                        <span className="text-red-500">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Select value={field.value} onValueChange={field.onChange}>
                                             <SelectTrigger>
@@ -747,17 +842,24 @@ export function OrdersMutateDrawer() {
                                             </SelectContent>
                                         </Select>
                                     </FormControl>
+                                    <FormDescription className="text-xs">
+                                        من سيتحمل رسوم الشحن (المرسل أو المستقبل)
+                                    </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
 
+                        <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
                             name="shipping_fees"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>رسوم الشحن</FormLabel>
+                                    <FormLabel className="flex items-center gap-2">
+                                        رسوم الشحن
+                                        <span className="text-red-500">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -778,7 +880,10 @@ export function OrdersMutateDrawer() {
                             name="fees_currency_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>عملة الرسوم</FormLabel>
+                                    <FormLabel className="flex items-center gap-2">
+                                        عملة الرسوم
+                                        <span className="text-red-500">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Popover open={feesCurrencyOpen} onOpenChange={setFeesCurrencyOpen}>
                                             <PopoverTrigger asChild>
@@ -835,13 +940,18 @@ export function OrdersMutateDrawer() {
                                 </FormItem>
                             )}
                         />
+                        </div>
 
+                        <div className="grid grid-cols-2 gap-4">
                         <FormField
                             control={form.control}
                             name="cash_on_delivery"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>الدفع عند الاستلام</FormLabel>
+                                    <FormLabel className="flex items-center gap-2">
+                                        الدفع عند الاستلام
+                                        <span className="text-red-500">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Input
                                             type="number"
@@ -862,7 +972,10 @@ export function OrdersMutateDrawer() {
                             name="cod_currency_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>عملة الدفع عند الاستلام</FormLabel>
+                                    <FormLabel className="flex items-center gap-2">
+                                        عملة الدفع عند الاستلام
+                                        <span className="text-red-500">*</span>
+                                    </FormLabel>
                                     <FormControl>
                                         <Popover open={codCurrencyOpen} onOpenChange={setCodCurrencyOpen}>
                                             <PopoverTrigger asChild>
@@ -919,10 +1032,36 @@ export function OrdersMutateDrawer() {
                                 </FormItem>
                             )}
                         />
+                        </div>
 
-                        <SheetFooter>
-                            <Button type="submit" disabled={createState.loading || updateState.loading}>
-                                {isUpdate ? 'تحديث' : 'إنشاء'}
+                        <FormDescription className="text-xs text-muted-foreground">
+                            المبلغ الذي سيدفعه المستلم عند استلام الشحنة
+                        </FormDescription>
+                        </div>
+
+                        {/* Form Actions */}
+                        <SheetFooter className="pt-6 gap-2">
+                            <Button 
+                                type="button" 
+                                variant="outline" 
+                                onClick={handleClose}
+                                disabled={createState.loading || updateState.loading}
+                            >
+                                إلغاء
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                disabled={createState.loading || updateState.loading}
+                                className="min-w-[120px]"
+                            >
+                                {createState.loading || updateState.loading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        جاري الحفظ...
+                                    </>
+                                ) : (
+                                    isUpdate ? 'تحديث الشحنة' : 'إنشاء الشحنة'
+                                )}
                             </Button>
                         </SheetFooter>
                     </form>

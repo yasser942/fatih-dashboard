@@ -28,6 +28,7 @@ import { Route as ClerkauthRouteRouteImport } from './routes/clerk/(auth)/route'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
+import { Route as AuthenticatedTaskTypesIndexRouteImport } from './routes/_authenticated/task-types/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedRolesIndexRouteImport } from './routes/_authenticated/roles/index'
 import { Route as AuthenticatedPositionsIndexRouteImport } from './routes/_authenticated/positions/index'
@@ -145,6 +146,12 @@ const AuthenticatedTasksIndexRoute = AuthenticatedTasksIndexRouteImport.update({
   path: '/tasks/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTaskTypesIndexRoute =
+  AuthenticatedTaskTypesIndexRouteImport.update({
+    id: '/task-types/',
+    path: '/task-types/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsIndexRoute =
   AuthenticatedSettingsIndexRouteImport.update({
     id: '/',
@@ -324,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/positions': typeof AuthenticatedPositionsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/task-types': typeof AuthenticatedTaskTypesIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
 }
@@ -364,6 +372,7 @@ export interface FileRoutesByTo {
   '/positions': typeof AuthenticatedPositionsIndexRoute
   '/roles': typeof AuthenticatedRolesIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
+  '/task-types': typeof AuthenticatedTaskTypesIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
 }
@@ -410,6 +419,7 @@ export interface FileRoutesById {
   '/_authenticated/positions/': typeof AuthenticatedPositionsIndexRoute
   '/_authenticated/roles/': typeof AuthenticatedRolesIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
+  '/_authenticated/task-types/': typeof AuthenticatedTaskTypesIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
 }
@@ -454,6 +464,7 @@ export interface FileRouteTypes {
     | '/positions'
     | '/roles'
     | '/settings/'
+    | '/task-types'
     | '/tasks'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
@@ -494,6 +505,7 @@ export interface FileRouteTypes {
     | '/positions'
     | '/roles'
     | '/settings'
+    | '/task-types'
     | '/tasks'
     | '/users'
   id:
@@ -539,6 +551,7 @@ export interface FileRouteTypes {
     | '/_authenticated/positions/'
     | '/_authenticated/roles/'
     | '/_authenticated/settings/'
+    | '/_authenticated/task-types/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
   fileRoutesById: FileRoutesById
@@ -687,6 +700,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/task-types/': {
+      id: '/_authenticated/task-types/'
+      path: '/task-types'
+      fullPath: '/task-types'
+      preLoaderRoute: typeof AuthenticatedTaskTypesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/': {
@@ -922,6 +942,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPermissionsIndexRoute: typeof AuthenticatedPermissionsIndexRoute
   AuthenticatedPositionsIndexRoute: typeof AuthenticatedPositionsIndexRoute
   AuthenticatedRolesIndexRoute: typeof AuthenticatedRolesIndexRoute
+  AuthenticatedTaskTypesIndexRoute: typeof AuthenticatedTaskTypesIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
 }
@@ -946,6 +967,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPermissionsIndexRoute: AuthenticatedPermissionsIndexRoute,
   AuthenticatedPositionsIndexRoute: AuthenticatedPositionsIndexRoute,
   AuthenticatedRolesIndexRoute: AuthenticatedRolesIndexRoute,
+  AuthenticatedTaskTypesIndexRoute: AuthenticatedTaskTypesIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
 }

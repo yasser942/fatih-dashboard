@@ -6,9 +6,13 @@ export function UsersPrimaryButtons() {
   const { setOpen } = useUsers()
 
   return (
-    <Button onClick={() => setOpen('create')}>
-      <PlusIcon className='me-2 size-4' />
-      إضافة مستخدم
+    <Button
+      onClick={() => setOpen('create')}
+      size="default"
+      className="gap-2 shadow-sm hover:shadow-md transition-shadow"
+    >
+      <PlusIcon className='size-4' />
+      <span className="font-medium">إضافة مستخدم جديد</span>
     </Button>
   )
 }

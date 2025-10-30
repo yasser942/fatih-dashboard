@@ -1,23 +1,42 @@
 import type { ColumnDef } from '@tanstack/react-table'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { DataTableRowActions } from './data-table-row-actions'
 import type { User, UserStatus } from '../data/schema'
 import { formatDate } from '@/lib/utils'
+import {
+  CheckCircledIcon,
+  CrossCircledIcon,
+  ClockIcon,
+  LockClosedIcon,
+  EnvelopeClosedIcon,
+  MobileIcon,
+  BackpackIcon
+} from '@radix-ui/react-icons'
 
-const statusColors: Record<UserStatus, string> = {
-  Active: 'bg-green-500/10 text-green-500 hover:bg-green-500/20',
-  Inactive: 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20',
-  Pending: 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20',
-  Blocked: 'bg-red-500/10 text-red-500 hover:bg-red-500/20',
-}
-
-const statusLabels: Record<UserStatus, string> = {
-  Active: 'نشط',
-  Inactive: 'غير نشط',
-  Pending: 'معلق',
-  Blocked: 'محظور',
+const statusConfig: Record<UserStatus, { icon: React.ReactNode; color: string; label: string }> = {
+  Active: {
+    icon: <CheckCircledIcon className="h-3 w-3" />,
+    color: 'bg-green-500/10 text-green-500 hover:bg-green-500/20 border-green-500/20',
+    label: 'نشط',
+  },
+  Inactive: {
+    icon: <CrossCircledIcon className="h-3 w-3" />,
+    color: 'bg-gray-500/10 text-gray-500 hover:bg-gray-500/20 border-gray-500/20',
+    label: 'غير نشط',
+  },
+  Pending: {
+    icon: <ClockIcon className="h-3 w-3" />,
+    color: 'bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border-yellow-500/20',
+    label: 'معلق',
+  },
+  Blocked: {
+    icon: <LockClosedIcon className="h-3 w-3" />,
+    color: 'bg-red-500/10 text-red-500 hover:bg-red-500/20 border-red-500/20',
+    label: 'محظور',
+  },
 }
 
 export const usersColumns: ColumnDef<User>[] = [
@@ -51,18 +70,36 @@ export const usersColumns: ColumnDef<User>[] = [
   },
   {
     accessorKey: 'full_name',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='الاسم الكامل' />,
+    header: ({ column }) => <DataTableColumnHeader column={column} title='المستخدم' />,
     cell: ({ row }) => {
       const fullName = row.getValue('full_name') as string | null
       const name = row.original.name
-      return <div className='max-w-[200px] truncate font-medium'>{fullName || name}</div>
+      const email = row.original.email
+      const displayName = fullName || name
+      const initials = displayName
+        .split(' ')
+        .map(word => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+
+      return (
+        <div className='flex items-center gap-3'>
+          <Avatar className="h-9 w-9">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className='font-medium text-sm'>{displayName}</span>
+            <span className='text-xs text-muted-foreground flex items-center gap-1'>
+              <EnvelopeClosedIcon className="h-3 w-3" />
+              {email}
+            </span>
+          </div>
+        </div>
+      )
     },
-    enableSorting: true,
-  },
-  {
-    accessorKey: 'email',
-    header: ({ column }) => <DataTableColumnHeader column={column} title='البريد الإلكتروني' />,
-    cell: ({ row }) => <div className='max-w-[200px] truncate'>{row.getValue('email')}</div>,
     enableSorting: true,
   },
   {
@@ -70,7 +107,14 @@ export const usersColumns: ColumnDef<User>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title='الهاتف' />,
     cell: ({ row }) => {
       const phone = row.getValue('phone') as string | null
-      return <div className='max-w-[150px] truncate'>{phone || '-'}</div>
+      return phone ? (
+        <div className='flex items-center gap-2 text-sm'>
+          <MobileIcon className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-mono">{phone}</span>
+        </div>
+      ) : (
+        <span className="text-muted-foreground text-sm">-</span>
+      )
     },
     enableSorting: false,
   },
@@ -79,7 +123,14 @@ export const usersColumns: ColumnDef<User>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title='الوظيفة' />,
     cell: ({ row }) => {
       const job = row.getValue('Job') as string | null
-      return <div className='max-w-[150px] truncate'>{job || '-'}</div>
+      return job ? (
+        <div className='flex items-center gap-2'>
+          <BackpackIcon className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className='text-sm'>{job}</span>
+        </div>
+      ) : (
+        <span className="text-muted-foreground text-sm">-</span>
+      )
     },
     enableSorting: false,
   },
@@ -88,9 +139,11 @@ export const usersColumns: ColumnDef<User>[] = [
     header: ({ column }) => <DataTableColumnHeader column={column} title='الحالة' />,
     cell: ({ row }) => {
       const status = row.getValue('status') as UserStatus
+      const config = statusConfig[status]
       return (
-        <Badge variant='outline' className={statusColors[status]}>
-          {statusLabels[status]}
+        <Badge variant='outline' className={`${config.color} gap-1.5`}>
+          {config.icon}
+          {config.label}
         </Badge>
       )
     },
@@ -104,16 +157,16 @@ export const usersColumns: ColumnDef<User>[] = [
     header: 'الأدوار',
     cell: ({ row }) => {
       const roles = row.original.roles || []
-      if (roles.length === 0) return <div className='text-muted-foreground'>-</div>
+      if (roles.length === 0) return <span className='text-muted-foreground text-sm'>-</span>
       return (
         <div className='flex flex-wrap gap-1'>
           {roles.slice(0, 2).map((role) => (
-            <Badge key={role.id} variant='secondary' className='text-xs'>
+            <Badge key={role.id} variant='secondary' className='text-xs font-medium bg-blue-500/10 text-blue-600 hover:bg-blue-500/20'>
               {role.name}
             </Badge>
           ))}
           {roles.length > 2 && (
-            <Badge variant='secondary' className='text-xs'>
+            <Badge variant='outline' className='text-xs font-mono'>
               +{roles.length - 2}
             </Badge>
           )}
