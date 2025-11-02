@@ -13,7 +13,9 @@ import {
   LockClosedIcon,
   EnvelopeClosedIcon,
   MobileIcon,
-  BackpackIcon
+  BackpackIcon,
+  PersonIcon,
+  IdCardIcon
 } from '@radix-ui/react-icons'
 
 const statusConfig: Record<UserStatus, { icon: React.ReactNode; color: string; label: string }> = {
@@ -151,6 +153,41 @@ export const usersColumns: ColumnDef<User>[] = [
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id))
     },
+  },
+  {
+    id: 'user_kind',
+    header: 'النوع',
+    cell: ({ row }) => {
+      const user = row.original
+      const isCustomer = user.customer !== null && user.customer !== undefined
+      const isEmployee = user.employee !== null && user.employee !== undefined
+
+      if (isEmployee) {
+        return (
+          <Badge variant='outline' className='bg-purple-500/10 text-purple-600 hover:bg-purple-500/20 border-purple-500/20 gap-1.5'>
+            <IdCardIcon className="h-3 w-3" />
+            موظف
+          </Badge>
+        )
+      }
+
+      if (isCustomer) {
+        return (
+          <Badge variant='outline' className='bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-500/20 gap-1.5'>
+            <PersonIcon className="h-3 w-3" />
+            عميل
+          </Badge>
+        )
+      }
+
+      return (
+        <Badge variant='outline' className='bg-gray-500/10 text-gray-600 hover:bg-gray-500/20 border-gray-500/20 gap-1.5'>
+          <PersonIcon className="h-3 w-3" />
+          مستخدم
+        </Badge>
+      )
+    },
+    enableSorting: false,
   },
   {
     accessorKey: 'roles',

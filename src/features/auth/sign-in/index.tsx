@@ -27,23 +27,6 @@ export function SignIn() {
           <UserAuthForm redirectTo={redirect} />
         </CardContent>
         <CardFooter className='flex flex-col space-y-4'>
-          <p className='text-muted-foreground px-8 text-center text-sm'>
-            بالنقر على تسجيل الدخول، فإنك توافق على{' '}
-            <a
-              href='/terms'
-              className='hover:text-primary underline underline-offset-4'
-            >
-              شروط الخدمة
-            </a>{' '}
-            و{' '}
-            <a
-              href='/privacy'
-              className='hover:text-primary underline underline-offset-4'
-            >
-              سياسة الخصوصية
-            </a>
-            .
-          </p>
           <p className='text-muted-foreground text-center text-sm'>
             ليس لديك حساب؟{' '}
             <Link

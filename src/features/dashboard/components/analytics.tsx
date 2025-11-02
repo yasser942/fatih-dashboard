@@ -12,8 +12,8 @@ export function Analytics() {
     <div className='space-y-4'>
       <Card>
         <CardHeader>
-          <CardTitle>Traffic Overview</CardTitle>
-          <CardDescription>Weekly clicks and unique visitors</CardDescription>
+          <CardTitle>نظرة عامة على المرور</CardTitle>
+          <CardDescription>النقرات والزوار الفريدون الأسبوعية</CardDescription>
         </CardHeader>
         <CardContent className='px-6'>
           <AnalyticsChart />
@@ -22,7 +22,7 @@ export function Analytics() {
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Total Clicks</CardTitle>
+            <CardTitle className='text-sm font-medium'>إجمالي النقرات</CardTitle>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 24 24'
@@ -39,13 +39,13 @@ export function Analytics() {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>1,248</div>
-            <p className='text-muted-foreground text-xs'>+12.4% vs last week</p>
+            <p className='text-muted-foreground text-xs'>+12.4% مقارنة بالأسبوع الماضي</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
             <CardTitle className='text-sm font-medium'>
-              Unique Visitors
+              الزوار الفريدون
             </CardTitle>
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -63,12 +63,12 @@ export function Analytics() {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>832</div>
-            <p className='text-muted-foreground text-xs'>+5.8% vs last week</p>
+            <p className='text-muted-foreground text-xs'>+5.8% مقارنة بالأسبوع الماضي</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Bounce Rate</CardTitle>
+            <CardTitle className='text-sm font-medium'>معدل الارتداد</CardTitle>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 24 24'
@@ -84,12 +84,12 @@ export function Analytics() {
           </CardHeader>
           <CardContent>
             <div className='text-2xl font-bold'>42%</div>
-            <p className='text-muted-foreground text-xs'>-3.2% vs last week</p>
+            <p className='text-muted-foreground text-xs'>-3.2% مقارنة بالأسبوع الماضي</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Avg. Session</CardTitle>
+            <CardTitle className='text-sm font-medium'>متوسط الجلسة</CardTitle>
             <svg
               xmlns='http://www.w3.org/2000/svg'
               viewBox='0 0 24 24'
@@ -105,24 +105,24 @@ export function Analytics() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>3m 24s</div>
-            <p className='text-muted-foreground text-xs'>+18s vs last week</p>
+            <div className='text-2xl font-bold'>3م 24ث</div>
+            <p className='text-muted-foreground text-xs'>+18ث مقارنة بالأسبوع الماضي</p>
           </CardContent>
         </Card>
       </div>
       <div className='grid grid-cols-1 gap-4 lg:grid-cols-7'>
         <Card className='col-span-1 lg:col-span-4'>
           <CardHeader>
-            <CardTitle>Referrers</CardTitle>
-            <CardDescription>Top sources driving traffic</CardDescription>
+            <CardTitle>المراجع</CardTitle>
+            <CardDescription>أهم مصادر حركة المرور</CardDescription>
           </CardHeader>
           <CardContent>
             <SimpleBarList
               items={[
-                { name: 'Direct', value: 512 },
+                { name: 'مباشر', value: 512 },
                 { name: 'Product Hunt', value: 238 },
                 { name: 'Twitter', value: 174 },
-                { name: 'Blog', value: 104 },
+                { name: 'المدونة', value: 104 },
               ]}
               barClass='bg-primary'
               valueFormatter={(n) => `${n}`}
@@ -131,15 +131,15 @@ export function Analytics() {
         </Card>
         <Card className='col-span-1 lg:col-span-3'>
           <CardHeader>
-            <CardTitle>Devices</CardTitle>
-            <CardDescription>How users access your app</CardDescription>
+            <CardTitle>الأجهزة</CardTitle>
+            <CardDescription>كيف يصل المستخدمون إلى تطبيقك</CardDescription>
           </CardHeader>
           <CardContent>
             <SimpleBarList
               items={[
-                { name: 'Desktop', value: 74 },
-                { name: 'Mobile', value: 22 },
-                { name: 'Tablet', value: 4 },
+                { name: 'سطح المكتب', value: 74 },
+                { name: 'الهاتف المحمول', value: 22 },
+                { name: 'اللوحي', value: 4 },
               ]}
               barClass='bg-muted-foreground'
               valueFormatter={(n) => `${n}%`}

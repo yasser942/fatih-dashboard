@@ -56,6 +56,7 @@ export const USERS_QUERY = gql`
         }
         created_at
         updated_at
+        orders_count
       }
       paginatorInfo {
         count
@@ -125,6 +126,7 @@ export const USER_QUERY = gql`
       }
       created_at
       updated_at
+      orders_count
     }
   }
 `

@@ -17,33 +17,33 @@ import {
 const items = [
   {
     id: 'recents',
-    label: 'Recents',
+    label: 'الأحدث',
   },
   {
     id: 'home',
-    label: 'Home',
+    label: 'الرئيسية',
   },
   {
     id: 'applications',
-    label: 'Applications',
+    label: 'التطبيقات',
   },
   {
     id: 'desktop',
-    label: 'Desktop',
+    label: 'سطح المكتب',
   },
   {
     id: 'downloads',
-    label: 'Downloads',
+    label: 'التحميلات',
   },
   {
     id: 'documents',
-    label: 'Documents',
+    label: 'المستندات',
   },
 ] as const
 
 const displayFormSchema = z.object({
   items: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: 'You have to select at least one item.',
+    message: 'يجب عليك اختيار عنصر واحد على الأقل.',
   }),
 })
 
@@ -72,9 +72,9 @@ export function DisplayForm() {
           render={() => (
             <FormItem>
               <div className='mb-4'>
-                <FormLabel className='text-base'>Sidebar</FormLabel>
+                <FormLabel className='text-base'>الشريط الجانبي</FormLabel>
                 <FormDescription>
-                  Select the items you want to display in the sidebar.
+                  اختر العناصر التي تريد عرضها في الشريط الجانبي.
                 </FormDescription>
               </div>
               {items.map((item) => (
@@ -114,7 +114,7 @@ export function DisplayForm() {
             </FormItem>
           )}
         />
-        <Button type='submit'>Update display</Button>
+        <Button type='submit'>تحديث العرض</Button>
       </form>
     </Form>
   )

@@ -46,11 +46,11 @@ const languages = [
 const accountFormSchema = z.object({
   name: z
     .string()
-    .min(1, 'Please enter your name.')
-    .min(2, 'Name must be at least 2 characters.')
-    .max(30, 'Name must not be longer than 30 characters.'),
-  dob: z.date('Please select your date of birth.'),
-  language: z.string('Please select a language.'),
+    .min(1, 'الرجاء إدخال اسمك.')
+    .min(2, 'يجب أن يكون الاسم مكونًا من حرفين على الأقل.')
+    .max(30, 'يجب ألا يتجاوز الاسم 30 حرفًا.'),
+  dob: z.date('الرجاء اختيار تاريخ ميلادك.'),
+  language: z.string('الرجاء اختيار لغة.'),
 })
 
 type AccountFormValues = z.infer<typeof accountFormSchema>
@@ -80,13 +80,12 @@ export function AccountForm() {
           name='name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>الاسم</FormLabel>
               <FormControl>
-                <Input placeholder='Your name' {...field} />
+                <Input placeholder='اسمك' {...field} />
               </FormControl>
               <FormDescription>
-                This is the name that will be displayed on your profile and in
-                emails.
+                هذا هو الاسم الذي سيتم عرضه على ملفك الشخصي وفي رسائل البريد الإلكتروني.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -97,10 +96,10 @@ export function AccountForm() {
           name='dob'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
-              <FormLabel>Date of birth</FormLabel>
+              <FormLabel>تاريخ الميلاد</FormLabel>
               <DatePicker selected={field.value} onSelect={field.onChange} />
               <FormDescription>
-                Your date of birth is used to calculate your age.
+                يتم استخدام تاريخ ميلادك لحساب عمرك.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -111,7 +110,7 @@ export function AccountForm() {
           name='language'
           render={({ field }) => (
             <FormItem className='flex flex-col'>
-              <FormLabel>Language</FormLabel>
+              <FormLabel>اللغة</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -127,15 +126,15 @@ export function AccountForm() {
                         ? languages.find(
                             (language) => language.value === field.value
                           )?.label
-                        : 'Select language'}
+                        : 'اختر اللغة'}
                       <CaretSortIcon className='ms-2 h-4 w-4 shrink-0 opacity-50' />
                     </Button>
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className='w-[200px] p-0'>
                   <Command>
-                    <CommandInput placeholder='Search language...' />
-                    <CommandEmpty>No language found.</CommandEmpty>
+                    <CommandInput placeholder='البحث عن لغة...' />
+                    <CommandEmpty>لم يتم العثور على لغة.</CommandEmpty>
                     <CommandGroup>
                       <CommandList>
                         {languages.map((language) => (
@@ -163,13 +162,13 @@ export function AccountForm() {
                 </PopoverContent>
               </Popover>
               <FormDescription>
-                This is the language that will be used in the dashboard.
+                هذه هي اللغة التي سيتم استخدامها في لوحة التحكم.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type='submit'>Update account</Button>
+        <Button type='submit'>تحديث الحساب</Button>
       </form>
     </Form>
   )

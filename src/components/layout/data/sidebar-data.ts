@@ -16,7 +16,6 @@ import {
   UserCog,
   UserX,
   Users,
-  MessagesSquare,
   ShieldCheck,
   AudioWaveform,
   Command,
@@ -32,7 +31,6 @@ import {
   Briefcase,
   UserCheck,
 } from 'lucide-react'
-import { ClerkLogo } from '@/assets/clerk-logo'
 import { FatihCargoLogo } from '@/components/fatih-cargo-logo'
 import { type SidebarData } from '../types'
 
@@ -83,12 +81,6 @@ export const sidebarData: SidebarData = {
               icon: Settings2,
             },
           ],
-        },
-        {
-          title: 'المراسلات',
-          url: '/chats',
-          badge: '3',
-          icon: MessagesSquare,
         },
         {
           title: 'العملات',
@@ -171,24 +163,6 @@ export const sidebarData: SidebarData = {
               title: 'الصلاحيات',
               url: '/permissions',
               icon: Lock,
-            },
-          ],
-        },
-        {
-          title: 'Secured by Clerk',
-          icon: ClerkLogo,
-          items: [
-            {
-              title: 'Sign In',
-              url: '/clerk/sign-in',
-            },
-            {
-              title: 'Sign Up',
-              url: '/clerk/sign-up',
-            },
-            {
-              title: 'User Management',
-              url: '/clerk/user-management',
             },
           ],
         },

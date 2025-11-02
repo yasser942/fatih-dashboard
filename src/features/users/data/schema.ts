@@ -41,6 +41,7 @@ export type User = {
   }>
   created_at?: string
   updated_at?: string
+  orders_count?: number
   customer?: {
     id: number
     customer_type: (typeof customerTypeValues)[number]
