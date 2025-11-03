@@ -1,22 +1,22 @@
 import { z } from 'zod'
 
-export const taskStatusValues = ['assigned', 'in_progress', 'done', 'cancelled', 'failed', 'reassigned'] as const
+export const taskStatusValues = ['pending', 'assigned', 'in_progress', 'done', 'cancelled', 'failed', 'reassigned'] as const
 export type TaskStatus = typeof taskStatusValues[number]
 
 export const taskSchema = z.object({
   id: z.string(),
-  order_id: z.string(),
+  order_id: z.string().nullable().optional(),
   order: z.object({
     id: z.string(),
     qr_code: z.string(),
   }).nullable().optional(),
-  user_id: z.string(),
+  user_id: z.string().nullable().optional(),
   user: z.object({
     id: z.string(),
     name: z.string(),
     email: z.string(),
   }).nullable().optional(),
-  vehicle_id: z.string(),
+  vehicle_id: z.string().nullable().optional(),
   vehicle: z.object({
     id: z.string(),
     plate_number: z.string(),
@@ -65,9 +65,18 @@ export const taskSchema = z.object({
 export type Task = z.infer<typeof taskSchema>
 
 export const createTaskSchema = z.object({
-  order_id: z.any().optional(),
-  user_id: z.any().optional(),
-  vehicle_id: z.any().optional(),
+  order_id: z.preprocess(
+    (val) => (val === undefined || val === null || val === '' || val === 'none' ? null : Number(val)),
+    z.number().nullable().optional()
+  ),
+  user_id: z.preprocess(
+    (val) => (val === undefined || val === null || val === '' || val === 'none' ? null : Number(val)),
+    z.number().nullable().optional()
+  ),
+  vehicle_id: z.preprocess(
+    (val) => (val === undefined || val === null || val === '' || val === 'none' ? null : Number(val)),
+    z.number().nullable().optional()
+  ),
   from_branch_id: z.preprocess(
     (val) => (val === undefined || val === null || val === '' || val === 'none' ? null : Number(val)),
     z.number().nullable().optional()
@@ -84,7 +93,10 @@ export const createTaskSchema = z.object({
     (val) => (val === undefined || val === null || val === '' || val === 'none' ? null : Number(val)),
     z.number().nullable().optional()
   ),
-  task_type_id: z.any().optional(),
+  task_type_id: z.preprocess(
+    (val) => (val === undefined || val === null || val === '' || val === 'none' ? undefined : Number(val)),
+    z.number({ required_error: 'يجب اختيار نوع المهمة المطلوبة', invalid_type_error: 'يجب اختيار نوع المهمة المطلوبة' })
+  ),
   current_status: z.enum(taskStatusValues, {
     required_error: 'حالة المهمة مطلوبة',
     invalid_type_error: 'يجب اختيار حالة صحيحة للمهمة',
@@ -102,89 +114,14 @@ export const createTaskSchema = z.object({
     invalid_type_error: 'قيمة غير صحيحة',
   }).default(false),
 }).superRefine((data, ctx) => {
-  // Validate and transform order_id
-  const orderId = data.order_id
-  if (orderId === undefined || orderId === null || orderId === '') {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['order_id'],
-      message: 'يجب اختيار الطلب المرتبط بالمهمة',
-    })
-  } else {
-    const num = Number(orderId)
-    if (isNaN(num) || num < 1) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['order_id'],
-        message: 'يجب اختيار الطلب المرتبط بالمهمة',
-      })
-    } else {
-      // Transform to number
-      ;(data as any).order_id = num
-    }
-  }
-
-  // Validate and transform user_id
-  const userId = data.user_id
-  if (userId === undefined || userId === null || userId === '') {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['user_id'],
-      message: 'يجب اختيار المستخدم المسؤول عن تنفيذ المهمة',
-    })
-  } else {
-    const num = Number(userId)
-    if (isNaN(num) || num < 1) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['user_id'],
-        message: 'يجب اختيار المستخدم المسؤول عن تنفيذ المهمة',
-      })
-    } else {
-      ;(data as any).user_id = num
-    }
-  }
-
-  // Validate and transform vehicle_id
-  const vehicleId = data.vehicle_id
-  if (vehicleId === undefined || vehicleId === null || vehicleId === '') {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['vehicle_id'],
-      message: 'يجب اختيار المركبة المستخدمة للمهمة',
-    })
-  } else {
-    const num = Number(vehicleId)
-    if (isNaN(num) || num < 1) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['vehicle_id'],
-        message: 'يجب اختيار المركبة المستخدمة للمهمة',
-      })
-    } else {
-      ;(data as any).vehicle_id = num
-    }
-  }
-
-  // Validate and transform task_type_id
-  const taskTypeId = data.task_type_id
-  if (taskTypeId === undefined || taskTypeId === null || taskTypeId === '') {
+  // No required checks for order_id, user_id, vehicle_id; they are optional.
+  // Only ensure task_type_id was transformed to a valid number by preprocess
+  if (data.task_type_id === undefined || data.task_type_id === null || (typeof data.task_type_id === 'number' && isNaN(data.task_type_id))) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['task_type_id'],
       message: 'يجب اختيار نوع المهمة المطلوبة',
     })
-  } else {
-    const num = Number(taskTypeId)
-    if (isNaN(num) || num < 1) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['task_type_id'],
-        message: 'يجب اختيار نوع المهمة المطلوبة',
-      })
-    } else {
-      ;(data as any).task_type_id = num
-    }
   }
 })
 

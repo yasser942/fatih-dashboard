@@ -34,6 +34,7 @@ import {
     type CreateTask,
     type UpdateTask,
 } from '../data/schema'
+import { z } from 'zod'
 import { CREATE_TASK_MUTATION, UPDATE_TASK_MUTATION } from '../graphql/mutations'
 import { GET_TASKS_QUERY } from '../graphql/queries'
 import { ORDERS_QUERY } from '@/features/orders/graphql/queries'
@@ -75,9 +76,6 @@ export function TasksMutateDrawer() {
                     if (issue.expected === 'number' && (issue.received === 'undefined' || issue.received === 'nan')) {
                         // Map field-specific messages
                         const fieldMessages: Record<string, string> = {
-                            order_id: 'يجب اختيار الطلب المرتبط بالمهمة',
-                            user_id: 'يجب اختيار المستخدم المسؤول عن تنفيذ المهمة',
-                            vehicle_id: 'يجب اختيار المركبة المستخدمة للمهمة',
                             task_type_id: 'يجب اختيار نوع المهمة المطلوبة',
                         }
                         const fieldPath = issue.path[0] as string
@@ -193,7 +191,7 @@ export function TasksMutateDrawer() {
         onError: (error: any) => {
             const errorMessage = error.graphQLErrors?.[0]?.message || error.message || 'حدث خطأ غير متوقع'
             const validationErrors = error.graphQLErrors?.[0]?.extensions?.validation
-            
+
             if (validationErrors) {
                 // Handle validation errors from backend
                 Object.keys(validationErrors).forEach((field) => {
@@ -241,7 +239,7 @@ export function TasksMutateDrawer() {
         onError: (error: any) => {
             const errorMessage = error.graphQLErrors?.[0]?.message || error.message || 'حدث خطأ غير متوقع'
             const validationErrors = error.graphQLErrors?.[0]?.extensions?.validation
-            
+
             if (validationErrors) {
                 // Handle validation errors from backend
                 Object.keys(validationErrors).forEach((field) => {
@@ -278,7 +276,7 @@ export function TasksMutateDrawer() {
     const onSubmit = async (data: CreateTask | UpdateTask) => {
         try {
             // Validate cancellation reason if status is cancelled or failed
-            if ((data.current_status === 'cancelled' || data.current_status === 'failed') && 
+            if ((data.current_status === 'cancelled' || data.current_status === 'failed') &&
                 (!data.reason_for_cancellation || data.reason_for_cancellation.trim() === '')) {
                 const statusText = data.current_status === 'cancelled' ? 'الإلغاء' : 'الفشل'
                 form.setError('reason_for_cancellation', {
@@ -290,44 +288,8 @@ export function TasksMutateDrawer() {
                 })
                 return
             }
-            
-            // Validate required fields are provided (already validated by schema, but double-check for safety)
-            const orderIdNum = typeof data.order_id === 'number' ? data.order_id : Number(data.order_id)
-            if (!data.order_id || isNaN(orderIdNum) || orderIdNum < 1) {
-                form.setError('order_id', {
-                    type: 'manual',
-                    message: 'يجب اختيار الطلب المرتبط بهذه المهمة'
-                })
-                toast.error('بيانات غير مكتملة', {
-                    description: 'يرجى اختيار الطلب المرتبط بالمهمة'
-                })
-                return
-            }
-            
-            const userIdNum = typeof data.user_id === 'number' ? data.user_id : Number(data.user_id)
-            if (!data.user_id || isNaN(userIdNum) || userIdNum < 1) {
-                form.setError('user_id', {
-                    type: 'manual',
-                    message: 'يجب اختيار المستخدم المسؤول عن تنفيذ المهمة'
-                })
-                toast.error('بيانات غير مكتملة', {
-                    description: 'يرجى اختيار المستخدم المسؤول عن تنفيذ المهمة'
-                })
-                return
-            }
-            
-            const vehicleIdNum = typeof data.vehicle_id === 'number' ? data.vehicle_id : Number(data.vehicle_id)
-            if (!data.vehicle_id || isNaN(vehicleIdNum) || vehicleIdNum < 1) {
-                form.setError('vehicle_id', {
-                    type: 'manual',
-                    message: 'يجب اختيار المركبة المستخدمة للمهمة'
-                })
-                toast.error('بيانات غير مكتملة', {
-                    description: 'يرجى اختيار المركبة المستخدمة للمهمة'
-                })
-                return
-            }
-            
+
+            // Only validate required task_type_id here; other FKs are optional now
             const taskTypeIdNum = typeof data.task_type_id === 'number' ? data.task_type_id : Number(data.task_type_id)
             if (!data.task_type_id || isNaN(taskTypeIdNum) || taskTypeIdNum < 1) {
                 form.setError('task_type_id', {
@@ -341,12 +303,24 @@ export function TasksMutateDrawer() {
             }
 
             const input: any = {
-                order_id: data.order_id,
-                user_id: data.user_id,
-                vehicle_id: data.vehicle_id,
-                task_type_id: data.task_type_id,
                 current_status: data.current_status,
                 is_auto_created: data.is_auto_created ?? false,
+            }
+
+            // Add optional foreign keys if provided
+            if (data.order_id !== null && data.order_id !== undefined) {
+                input.order_id = data.order_id
+            }
+            if (data.user_id !== null && data.user_id !== undefined) {
+                input.user_id = data.user_id
+            }
+            if (data.vehicle_id !== null && data.vehicle_id !== undefined) {
+                input.vehicle_id = data.vehicle_id
+            }
+
+            // Required foreign key
+            if (data.task_type_id !== null && data.task_type_id !== undefined) {
+                input.task_type_id = data.task_type_id
             }
 
             // Add optional fields only if they have values
@@ -409,12 +383,13 @@ export function TasksMutateDrawer() {
     const customers = customersData?.customers?.data || []
 
     const statusOptions = taskStatusValues.map((status) => ({
-        label: status === 'assigned' ? 'معين' :
-               status === 'in_progress' ? 'قيد التنفيذ' :
-               status === 'done' ? 'مكتمل' :
-               status === 'cancelled' ? 'ملغي' :
-               status === 'failed' ? 'فشل' :
-               status === 'reassigned' ? 'إعادة تعيين' : status,
+        label: status === 'pending' ? 'قيد الانتظار' :
+            status === 'assigned' ? 'معين' :
+                status === 'in_progress' ? 'قيد التنفيذ' :
+                    status === 'done' ? 'مكتمل' :
+                        status === 'cancelled' ? 'ملغي' :
+                            status === 'failed' ? 'فشل' :
+                                status === 'reassigned' ? 'إعادة تعيين' : status,
         value: status,
     }))
 
@@ -460,18 +435,20 @@ export function TasksMutateDrawer() {
                                             <FormLabel className="flex items-center gap-2">
                                                 <Package className="h-4 w-4" />
                                                 الطلب
-                                                <span className="text-red-500">*</span>
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="px-1">
                                                     <SelectDropdown
-                                                        defaultValue={field.value ? String(field.value) : undefined}
-                                                        onValueChange={(val) => field.onChange(Number(val))}
+                                                        defaultValue={field.value ? String(field.value) : 'none'}
+                                                        onValueChange={(val) => field.onChange(val === 'none' ? null : Number(val))}
                                                         placeholder="اختر الطلب"
-                                                        items={orders.map((order: any) => ({
-                                                            label: `#${order.id} - ${order.qr_code || 'بدون رمز'}`,
-                                                            value: String(order.id),
-                                                        }))}
+                                                        items={[
+                                                            { label: 'لا يوجد', value: 'none' },
+                                                            ...orders.map((order: any) => ({
+                                                                label: `#${order.id} - ${order.qr_code || 'بدون رمز'}`,
+                                                                value: String(order.id),
+                                                            })),
+                                                        ]}
                                                         isPending={ordersLoading}
                                                         disabled={isLoading}
                                                     />
@@ -530,18 +507,20 @@ export function TasksMutateDrawer() {
                                             <FormLabel className="flex items-center gap-2">
                                                 <User className="h-4 w-4" />
                                                 المستخدم
-                                                <span className="text-red-500">*</span>
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="px-1">
                                                     <SelectDropdown
-                                                        defaultValue={field.value ? String(field.value) : undefined}
-                                                        onValueChange={(val) => field.onChange(Number(val))}
+                                                        defaultValue={field.value ? String(field.value) : 'none'}
+                                                        onValueChange={(val) => field.onChange(val === 'none' ? null : Number(val))}
                                                         placeholder="اختر المستخدم"
-                                                        items={users.map((user: any) => ({
-                                                            label: `${user.name} (${user.email})`,
-                                                            value: String(user.id),
-                                                        }))}
+                                                        items={[
+                                                            { label: 'لا يوجد', value: 'none' },
+                                                            ...users.map((user: any) => ({
+                                                                label: `${user.name} (${user.email})`,
+                                                                value: String(user.id),
+                                                            })),
+                                                        ]}
                                                         isPending={usersLoading}
                                                         disabled={isLoading}
                                                     />
@@ -564,18 +543,20 @@ export function TasksMutateDrawer() {
                                             <FormLabel className="flex items-center gap-2">
                                                 <TruckIcon className="h-4 w-4" />
                                                 المركبة
-                                                <span className="text-red-500">*</span>
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="px-1">
                                                     <SelectDropdown
-                                                        defaultValue={field.value ? String(field.value) : undefined}
-                                                        onValueChange={(val) => field.onChange(Number(val))}
+                                                        defaultValue={field.value ? String(field.value) : 'none'}
+                                                        onValueChange={(val) => field.onChange(val === 'none' ? null : Number(val))}
                                                         placeholder="اختر المركبة"
-                                                        items={fleets.map((fleet: any) => ({
-                                                            label: `${fleet.plate_number || 'بدون لوحة'} - ${fleet.fleetType?.type_ar || fleet.fleetType?.type_en || 'غير محدد'}`,
-                                                            value: String(fleet.id),
-                                                        }))}
+                                                        items={[
+                                                            { label: 'لا يوجد', value: 'none' },
+                                                            ...fleets.map((fleet: any) => ({
+                                                                label: `${fleet.plate_number || 'بدون لوحة'} - ${fleet.fleetType?.type_ar || fleet.fleetType?.type_en || 'غير محدد'}`,
+                                                                value: String(fleet.id),
+                                                            })),
+                                                        ]}
                                                         isPending={fleetsLoading}
                                                         disabled={isLoading}
                                                     />

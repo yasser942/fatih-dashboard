@@ -22,6 +22,11 @@ import { ar } from 'date-fns/locale'
 
 const getStatusBadge = (status: TaskStatus) => {
     const statusConfig: Record<TaskStatus, { icon: React.ElementType; label: string; className: string }> = {
+        'pending': {
+            icon: Clock,
+            label: 'قيد الانتظار',
+            className: 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400',
+        },
         'assigned': {
             icon: FileText,
             label: 'معين',
@@ -181,6 +186,34 @@ export const tasksColumns: ColumnDef<Task>[] = [
         },
         filterFn: (row, id, value) => {
             return value.includes(row.getValue(id))
+        },
+    },
+    {
+        accessorKey: 'fromCustomer',
+        header: 'من عميل',
+        cell: ({ row }) => {
+            const customer = row.original.fromCustomer
+            if (!customer) return <span className="text-muted-foreground">-</span>
+            return (
+                <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{customer.market_name}</span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: 'toCustomer',
+        header: 'إلى عميل',
+        cell: ({ row }) => {
+            const customer = row.original.toCustomer
+            if (!customer) return <span className="text-muted-foreground">-</span>
+            return (
+                <div className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span>{customer.market_name}</span>
+                </div>
+            )
         },
     },
     {
