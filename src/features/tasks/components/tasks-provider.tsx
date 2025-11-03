@@ -1,36 +1,47 @@
-import React, { useState } from 'react'
-import useDialogState from '@/hooks/use-dialog-state'
+import { createContext, useContext, useState } from 'react'
 import { type Task } from '../data/schema'
 
-type TasksDialogType = 'create' | 'update' | 'delete' | 'import'
+type DialogType = 'create' | 'update' | 'delete' | null
 
-type TasksContextType = {
-  open: TasksDialogType | null
-  setOpen: (str: TasksDialogType | null) => void
+interface TasksContextType {
+  open: DialogType
+  setOpen: (open: DialogType) => void
   currentRow: Task | null
-  setCurrentRow: React.Dispatch<React.SetStateAction<Task | null>>
+  setCurrentRow: (row: Task | null) => void
+  refetch?: () => void
 }
 
-const TasksContext = React.createContext<TasksContextType | null>(null)
+const TasksContext = createContext<TasksContextType | undefined>(undefined)
 
-export function TasksProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useDialogState<TasksDialogType>(null)
+export function TasksProvider({
+  children,
+  refetch,
+}: {
+  children: React.ReactNode
+  refetch?: () => void
+}) {
+  const [open, setOpen] = useState<DialogType>(null)
   const [currentRow, setCurrentRow] = useState<Task | null>(null)
 
   return (
-    <TasksContext value={{ open, setOpen, currentRow, setCurrentRow }}>
+    <TasksContext.Provider
+      value={{
+        open,
+        setOpen,
+        currentRow,
+        setCurrentRow,
+        refetch,
+      }}
+    >
       {children}
-    </TasksContext>
+    </TasksContext.Provider>
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useTasks = () => {
-  const tasksContext = React.useContext(TasksContext)
-
-  if (!tasksContext) {
-    throw new Error('useTasks has to be used within <TasksContext>')
+export function useTasks() {
+  const context = useContext(TasksContext)
+  if (context === undefined) {
+    throw new Error('useTasks must be used within a TasksProvider')
   }
-
-  return tasksContext
+  return context
 }

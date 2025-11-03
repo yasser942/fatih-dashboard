@@ -82,7 +82,7 @@ export function UsersRolesDialog() {
     }
 
     const roles = rolesData?.roles || []
-    
+
     // Filter roles based on search query
     const filteredRoles = roles.filter((role: any) =>
         role.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -185,19 +185,19 @@ export function UsersRolesDialog() {
                 </div>
 
                 <DialogFooter className='gap-2'>
-                    <Button 
-                        type='button' 
-                        variant='outline' 
-                        onClick={handleClose} 
+                    <Button
+                        type='button'
+                        variant='outline'
+                        onClick={handleClose}
                         disabled={loading}
                         className='min-w-[100px]'
                     >
                         <X className='ml-2 h-4 w-4' />
                         إلغاء
                     </Button>
-                    <Button 
-                        type='button' 
-                        onClick={handleSubmit} 
+                    <Button
+                        type='button'
+                        onClick={handleSubmit}
                         disabled={loading}
                         className='min-w-[120px]'
                     >

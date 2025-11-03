@@ -73,8 +73,8 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
           <span>إدارة الصلاحيات</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={handleDelete} 
+        <DropdownMenuItem
+          onClick={handleDelete}
           disabled={user.orders_count && user.orders_count > 0}
           className='text-red-600 focus:text-red-600 gap-2 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50'
         >

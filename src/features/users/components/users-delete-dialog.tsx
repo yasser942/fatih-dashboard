@@ -65,9 +65,9 @@ export function UsersDeleteDialog() {
           <AlertDialogCancel disabled={loading} className='m-0'>
             إلغاء
           </AlertDialogCancel>
-          <AlertDialogAction 
-            onClick={handleDelete} 
-            disabled={loading} 
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={loading}
             className='m-0 bg-destructive text-destructive-foreground hover:bg-destructive/90 focus:ring-destructive'
           >
             {loading ? (
